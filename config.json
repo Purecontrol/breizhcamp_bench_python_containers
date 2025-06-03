@@ -1,0 +1,9 @@
+{
+    "duration_sec":          240,    
+    "size_mo":          4,       
+    "nb_ops_io":          8,      
+    "nb_threads_io":      8,      
+    "iterations_cpu":     50000,    
+    "nb_proc":            16,     
+    "max_task_wait_mult": 50      
+  }

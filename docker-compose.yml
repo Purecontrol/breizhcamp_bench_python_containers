@@ -1,0 +1,20 @@
+services:
+  official:
+    container_name: bench_official
+    build:
+      context: .
+      dockerfile: Dockerfile.official
+    volumes:
+      - ./config.json:/config.json
+      - ./results:/results
+  pyenv:
+    container_name: bench_pyenv
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv
+      args:
+        PYTHON_VERSION: "3.12.3"
+    volumes:
+      - ./config.json:/config.json
+      - ./results:/results
+

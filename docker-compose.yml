@@ -7,6 +7,8 @@ services:
     volumes:
       - ./config.json:/config.json
       - ./results:/results
+    environment:
+      IMAGE_NAME: official
   pyenv:
     container_name: bench_pyenv
     build:
@@ -17,4 +19,5 @@ services:
     volumes:
       - ./config.json:/config.json
       - ./results:/results
-
+    environment:
+      IMAGE_NAME: pyenv

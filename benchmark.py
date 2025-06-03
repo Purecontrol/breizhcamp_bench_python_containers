@@ -8,6 +8,7 @@ from functools import partial
 import argparse
 from pathlib import Path
 import json
+from datetime import datetime
 
 def little_io_operation(taille_mo: int = 4) -> None:
     bloc = os.urandom(1*10**6) # 1 mo
@@ -98,28 +99,45 @@ def load_conf(path: Path | None) -> dict:
     }
     
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Benchmark python images.")
+    parser = argparse.ArgumentParser(description="Benchmark python images.")
     parser.add_argument("-c", "--config", type=Path,
                         help="json configuration file.")
     args = parser.parse_args()
 
+    image_name  = os.getenv("IMAGE_NAME",  "unknown")
+    results_dir = Path(os.getenv("RESULTS_DIR", "/results"))
+
     cfg = load_conf(args.config)
+    max_wait = cfg["nb_proc"] * cfg["max_task_wait_mult"]
+    print("loaded parameters :", cfg, f"(max_tasks_waiting={max_wait})", sep="\n")
 
-    max_tasks_waiting = cfg["nb_proc"] * cfg["max_task_wait_mult"]
-    
-    print("loaded parameters :", cfg, f"(max_tasks_waiting={max_tasks_waiting})", sep="\n")
+    task = partial(target_worker,
+                   cfg["size_mo"], cfg["nb_ops_io"],
+                   cfg["nb_threads_io"], cfg["iterations_cpu"])
 
-    tache = partial(target_worker,
-                    cfg["size_mo"],
-                    cfg["nb_ops_io"],
-                    cfg["nb_threads_io"],
-                    cfg["iterations_cpu"])
+    total = start_bench(cfg["duration_sec"], task, cfg["nb_proc"], max_wait)
+    tpm   = total / (cfg["duration_sec"] / 60)
 
-    total = start_bench(cfg["duration_sec"], tache, cfg["nb_proc"], max_tasks_waiting)
-    tpm = total / (cfg["duration_sec"] / 60)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    stamp  = datetime.now().isoformat(timespec="seconds").replace(":", "-")
+    fname  = f"{image_name}_{stamp}.json"
+    out    = results_dir / fname
 
-    print(f"\nRESULTS : {total} tasks → {tpm:.2f} tasks/min")
+    output_data = {
+        "timestamp":       stamp,
+        "image":           image_name,
+        "duration_s":      cfg["duration_sec"],
+        "tasks":           total,
+        "tasks_per_min":   tpm,
+        "size_mo":         cfg["size_mo"],
+        "nb_ops_io":       cfg["nb_ops_io"],
+        "nb_threads_io":   cfg["nb_threads_io"],
+        "iterations_cpu":  cfg["iterations_cpu"],
+        "nb_proc":         cfg["nb_proc"],
+    }
+    out.write_text(json.dumps(output_data, indent=2))
+    print(f"\nRESULT ({image_name}) : {total} tasks → {tpm:.2f} tasks/min")
+    print(f"↪ results written in {out}")
 
 if __name__ == "__main__":
     main()

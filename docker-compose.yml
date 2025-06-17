@@ -9,15 +9,51 @@ services:
       - ./results:/results
     environment:
       IMAGE_NAME: official
-  pyenv:
-    container_name: bench_pyenv
+  pyenvfullopt:
+    container_name: bench_pyenvfullopt
     build:
       context: .
-      dockerfile: Dockerfile.pyenv
+      dockerfile: Dockerfile.pyenv.fullopt
       args:
         PYTHON_VERSION: "3.12.3"
     volumes:
       - ./config.json:/config.json
       - ./results:/results
     environment:
-      IMAGE_NAME: pyenv
+      IMAGE_NAME: pyenvfullopt
+  pyenvmiopt:
+    container_name: bench_pyenvmiopt
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv.miopt
+      args:
+        PYTHON_VERSION: "3.12.3"
+    volumes:
+      - ./config.json:/config.json
+      - ./results:/results
+    environment:
+      IMAGE_NAME: pyenvmiopt
+  pyenvbasic:
+    container_name: bench_pyenv_basic
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv.basic
+      args:
+        PYTHON_VERSION: "3.12.3"
+    volumes:
+      - ./config.json:/config.json
+      - ./results:/results
+    environment:
+      IMAGE_NAME: pyenvbasic
+  uv:
+    container_name: bench_uv
+    build:
+      context: .
+      dockerfile: Dockerfile.uv
+      args:
+        PYTHON_VERSION: "3.12.3"
+    volumes:
+      - ./config.json:/config.json
+      - ./results:/results
+    environment:
+      IMAGE_NAME: uv

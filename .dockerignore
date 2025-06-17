@@ -1,0 +1,8 @@
+*
+!benchmark.py
+!config.json
+!Dockerfile.official
+!Dockerfile.pyenv.basic
+!Dockerfile.pyenv.fullopt
+!Dockerfile.pyenv.miopt
+!Dockerfile.uv

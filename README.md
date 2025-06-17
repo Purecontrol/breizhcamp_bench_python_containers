@@ -30,3 +30,55 @@ docker run --rm -v $PWD/:/home/marp/app/ -e LANG=$LANG -e MARP_USER="$(id -u):$(
 Documentation :
 
 - https://marpit.marp.app/image-syntax
+
+## contenu de la présentation
+
+- intégrer diagramme de fonctionnement local-pro (Luc)
+
+- comment enquêter ?
+  - métriques bas niveau du conteneur (ram, cpu) : `cadvisor`
+  - logs métier (nb de tâches traitées, durée moyenne de traitement d'une tâche)
+  - profilage du temps passé : kcachegrind
+
+- optimiser un service numérique Python (Luc)
+  - algorithmie (list comprehension)
+  - architecture (gestion des connexions à des bdd, IO, concurrence et parallélisation -> évoquer le `global interpreter lock`)
+  - `python -O mon_script.py` (docstrings supprimées, asserts ignorés, à compléter)
+  - options de compilation de l'interpréteur python
+
+- conclusions
+  - nous :
+    - le profilage du temps d'exécution ne nous a pas aidé
+    - [transition vers conclusions génériques] mesurer avant d'optimiser (et après !)
+  - plus génériques
+    - `python -O` intéressant mais rarement utilisé
+    - pyenv par défaut : installation rapide de python mais sans aucune option d'optimisation /!\
+    - pyenv avec options d'optimisation : installation lente (on ne le fait pas tous les jours sur son poste ; attention à la CI -> utiliser des images python pré-compilées), mais améliorations conséquentes !
+    - uv + python-build-standalone : un binaire python portable a longtemps été une difficulté (différents chemins de fichiers en dur) mais l'ambition de ce projet est de fournir des binaires pré-compilés -> options d'optimisation incluses (à vérifier) et temps de téléchargement rapide
+
+## plan d'expérience
+
+- version ancienne de local-pro (Sébastien et Gary)
+- benchmark.py (Luc)
+
+conteneurisations :
+
+1. image docker python officielle : 3.12.3. Compilée avec `--enable-optimizations` et potentiellement avec `--with-lto` (https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.12/slim-bookworm/Dockerfile#L72-L78)
+2. image pyenv sans aucune option d'otimisation dans pyenv
+3. image pyenv avec les options d'otimisation `PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"` dans pyenv
+4. image pyenv avec les options d'otimisation `PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"` et `PYTHON_CFLAGS="-march=native -mtune=native"` dans pyenv
+5. (option) avec la version [python-build-standalone](https://github.com/astral-sh/python-build-standalone) installée avec [uv](https://docs.astral.sh/uv/guides/install-python/) ?
+  - `--enable-optimizations` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L472
+  - `--with-lto` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L509
+  - pas de `PYTHON_CFLAGS="-march=native -mtune=native"`
+
+```Dockerfile
+FROM debian:bookworm-slim
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+RUN uv python install 3.12.3
+
+# installation de poetry
+# installation des dépendances avec poetry
+```

@@ -152,3 +152,4 @@ python3 -m sysconfig | grep CONFIG_ARGS
 ```
 
 - pyenv installe depuis les sources, configuration du build avec des drapeaux ou des variables d'environnement
+- python-build-standalone (utilisé par uv) produit des binaires optimisés avec `--enable-optimizations` (https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L472), mais d'autres drapeaux d'optimisation spécifique (à l'architecture du CPU) ne sont pas utilisés

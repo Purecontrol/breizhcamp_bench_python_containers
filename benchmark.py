@@ -120,7 +120,7 @@ def main() -> None:
 
     results_dir.mkdir(parents=True, exist_ok=True)
     stamp  = datetime.now().isoformat(timespec="seconds").replace(":", "-")
-    fname  = f"{image_name}_{stamp}.json"
+    fname  = f"{stamp}_{image_name}.json"
     out    = results_dir / fname
 
     output_data = {

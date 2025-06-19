@@ -34,34 +34,24 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 - Gaston Gary : dev [Purecontrol](https://www.purecontrol.com/)
 - Luc Sorel-Giffo : lead dev [See you sun](https://seeyousun.fr/) (co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/))
 
----
-
-## Le service numérique à conteneuriser : local-processing
-
-(un diagramme plantuml ou mermaid pour illustrer le propos ?)
-
-- dev : pyenv + poetry
-- batch lancé toutes les minutes
-- récupération des définitions des calculs à faire : IO
-- parallélisation
-  - récupération des données horodatées à manipuler : IO
-  - calculs (conversion, agrégation) : CPU
-  - enregistrement des résultats : IO
-  - enregistrement de l'état des calculs (succès / échec) : IO
 
 ---
+## Le service numérique à conteneuriser : local-processing GG
 
-## Enjeux et ressources
+quick intro 
 
-- nombre de calculs faits chaque minute
-- durée moyenne d'un calcul
-- CPU et RAM mobilisée
+---
+### Schema architecture et présentation GG
+![width:850px](media/archi.drawio.svg)
 
-Les performances sur une VM dédiée bichonnée à la main.
+---
+### key points archi GG
+
+Les specificités propres à LP, objectif d'amélioration et de bonne pratique d'ingenerie logiciel >>> on veut dockeriser
 
 ---
 
-## Déploiement manuel sur une VM dédiée ?
+### Déploiement manuel sur une VM dédiée ? GG
 
 - utilisation du binaire python distribué avec le système
 - dépendances installées sur le système
@@ -70,21 +60,18 @@ Les performances sur une VM dédiée bichonnée à la main.
 
 ![](https://s2.qwant.com/thumbr/474x303/7/7/c159a4416cf1b30fea194a49da801d59f966c0e2d414580ef384f01760efe7/th.jpg?u=https%3A%2F%2Ftse.mm.bing.net%2Fth%3Fid%3DOIP.ZIaKioLPt65-c3ntAHQewgHaEv%26pid%3DApi&q=0&b=1&p=0&a=0)
 
----
-
-## Conteneurisation Docker
+### Conteneurisation Docker GG
 
 ```dockerfile
 FROM python:3.12-slim
 
 # installation des dépendances
-...
 # copie des sources
 ...
 ```
 
 L'image embarque tout :
-- le binaire Python (passage de 3.8 à 3.11 au passage)
+- le binaire Python (passage de 3.8 à 3.12 au passage)
 - les dépendances
 - le code source
 - reproductibilité de l'environnement applicatif
@@ -92,15 +79,13 @@ L'image embarque tout :
 
 ---
 
-## Oui mais...
+### Oui mais... GG
 
 Pertes de performance de 30% !
 
 ![width:300px](https://www.petitgoeland.fr/849954-large_default/sweat-homme-col-rond-le-futur-c-etait-mieux-avant.jpg)
 
 ---
-
-## Il nous faut un plan
 
 Est-ce l'effet de :
 * la conteneurisation et l'allocation de ressources (CPU / RAM, overhead réseau) ?
@@ -109,25 +94,51 @@ Est-ce l'effet de :
 
 ---
 
-## Expérimentations 🧪
+## Quels sont les points d'optimisation d'un service numérique python ?
+- algorithmie
+- architecture 
+- optimisation du runtime
+---
 
-* VM *a la mano* avec Python 3.11 (pas fait, il me semble - on ne voulait pas renoncer à la dockerisation) 🙅
-* Dockerfile avec une image de base embarquant un binaire python 3.12
+### algorithmie LUC
 
-* -> on retrouve des performances comparables à la VM (😀 ouf !)
-* -> on dépend de la version de python de la distribution (pas ouf 😕)
-* -> mais qu'est-ce qui cloche avec les images python officielle ? 🤔
+ (list comprehension: python c'est lent, rediriger vers code compilé, C Rust numpy compréhension)
 
 ---
 
-## Comparaison de Dockerfiles officiels
+### architecture LUC
+
+ (gestion des connexions à des bdd, IO, concurrence et parallélisation -> évoquer le `global interpreter lock`)
+
+---
+
+### Optimisation de l'execution luc
+
+`python -O mon_script.py` (docstrings supprimées, asserts ignorés, à compléter)
+- just in time compilation JIT
+
+---
+
+### Optimisation du runtime SEB
+
+- options de compilation de l'interpréteur python
+
+---
+
+#TODO details des flags de compile 
+
+détails des flags dans les images
+
+---
+
+### Comparaison de Dockerfiles officiels LUC
 
 - https://hub.docker.com/_/python/
   - https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.11/slim-bookworm/Dockerfile#L72-L95
 
 ---
 
-## Installation personnalisée avec pyenv
+### Installation personnalisée avec pyenv LUC
 
 voir :
 - https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#special-environment-variables : CONFIGURE_OPTS
@@ -135,7 +146,34 @@ voir :
 
 ---
 
-...
+### ATTENTION GG
+l'utilisation du flag peut vous rendre dépendant de l'architecture CPU.
+nécessaire d'avoir la meme archi CPU entre le build et le run.
+
+Temps de compilation de l'interpreteur
+l'image peut prendre du temps à build.
+stocker l'image déjà compilé dans une registry.
+
+---
+
+
+## Benchmarking methodo et resultat GG
+
+* comment enquêter ?
+  * métriques bas niveau du conteneur (ram, cpu) : `cadvisor`
+  * logs métier (nb de tâches traitées, durée moyenne de traitement d'une tâche)
+  * profilage du temps passé : kcachegrind
+
+---
+
+### présentation du bench et des différentes images LUC
+---
+
+### résultats LUC
+
+- nombre de calculs faits chaque minute
+- durée moyenne d'un calcul
+- CPU et RAM mobilisée
 
 ---
 

@@ -82,3 +82,13 @@ RUN uv python install 3.12.11
 # installation de poetry
 # installation des dépendances avec poetry
 ```
+
+## Monitoring du benchmark
+
+### Temps de création des images Docker applicatives
+
+```sh
+# construction des images et logging des temps
+bash 1_images_build_time.sh
+# -> résultats dans le dossier 1_build_times/ (non versionné)
+```

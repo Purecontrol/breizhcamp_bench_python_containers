@@ -1,6 +1,8 @@
 *
+# benchmark content
 !benchmark.py
 !config.json
+# benchmarked images
 !Dockerfile.official
 !Dockerfile.pyenv.basic
 !Dockerfile.pyenv.fullopt

@@ -1,12 +1,9 @@
 FROM debian:bookworm-slim
+ARG PYTHON_VERSION=3.12.11
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN uv python install ${PYTHON_VERSION} --default --preview
-
-# ENV PATH="/opt/python/bin:$PATH"
-
-# RUN echo "/opt/python/lib" > /etc/ld.so.conf.d/python.conf && ldconfig
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*

@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim AS builder
 
-ARG PYTHON_VERSION=3.12.3
+ARG PYTHON_VERSION=3.12.11
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
@@ -22,7 +22,7 @@ RUN pyenv install -v "${PYTHON_VERSION}" && \
 
 FROM debian:bookworm-slim
 
-ARG PYTHON_VERSION=3.12.3
+ARG PYTHON_VERSION=3.12.11
 
 COPY --from=builder /python/versions/${PYTHON_VERSION} /opt/python
 ENV PATH="/opt/python/bin:$PATH"

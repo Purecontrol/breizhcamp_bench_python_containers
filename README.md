@@ -63,7 +63,7 @@ Documentation :
 
 conteneurisations :
 
-1. image docker python officielle : 3.12.3. Compilée avec `--enable-optimizations` et potentiellement avec `--with-lto` (https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.12/slim-bookworm/Dockerfile#L72-L78)
+1. image docker python officielle : 3.12.11. Compilée avec `--enable-optimizations` et potentiellement avec `--with-lto` (https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.12/slim-bookworm/Dockerfile#L72-L78)
 2. image pyenv sans aucune option d'otimisation dans pyenv
 3. image pyenv avec les options d'otimisation `PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"` dans pyenv
 4. image pyenv avec les options d'otimisation `PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"` et `PYTHON_CFLAGS="-march=native -mtune=native"` dans pyenv
@@ -77,7 +77,7 @@ FROM debian:bookworm-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN uv python install 3.12.3
+RUN uv python install 3.12.11
 
 # installation de poetry
 # installation des dépendances avec poetry

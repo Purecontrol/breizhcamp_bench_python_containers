@@ -119,21 +119,49 @@ Est-ce l'effet de :
 
 ---
 
-### Optimisation du runtime SEB
+### Optimisation du runtime python
 
-- Compilation optimization
-  - Compiler level Optimization
-  - Profile Guided Optimization
-- Link Time Optimization (Whole program optimisation)
-- Post link optimization -> Bolt LLVM
+- Différentes optimisations durant les phases de compilations
+
+![center](./media/optimizations.drawio.svg)
 
 
-- `python3 -m sysconfig | grep CONFIG_ARGS`
+- Pour visualiser les options du runtime
+  - `python3 -m sysconfig | grep CONFIG_ARGS`
 
 
-- options de compilation de l'interpréteur python
+<!-- Seb
+Compiler level optimisation
 
+-O3 -> va optimiser fichier par fichier
+-march=native -> Séléction de l'architecture courante comme cible
+/!\ pas compatible avec un CPU qui n'aurait pas les instructions
+Voir ici pour les subset https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+
+Profile Guided optimization
+Compilation instrumenté -> Execution -> Recompilation optimisé
+
+Inlining, réorganisation des blocs, optimisation des boucles, etc.
+
+Link Time Optimization
+Optimisation multi fichier .o
+
+Analyse statique du programme entier
+
+Post Link Optimization
+Compilation normale -> Profilage (optionnel) -> Optimisation du binaire
+
+Réarrangement des fonctions/blocs (layout), ICF, optimisation des tables de saut, etc.
+Optimisation cache
+
+
+Flags
+
+https://docs.python.org/3/using/configure.html#performance-options
+
+ -->
 ---
+### CFLAGS
 
 #TODO details des flags de compile
 

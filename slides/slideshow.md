@@ -22,7 +22,7 @@ style: |
 # Conteneurisation de Python
 Chute de performances et investigations
 
-<!-- 
+<!--
 _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin 2025"
  -->
 
@@ -38,7 +38,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 ---
 ## Le service numérique à conteneuriser : local-processing GG
 
-quick intro 
+quick intro
 
 ---
 ### Schema architecture et présentation GG
@@ -96,7 +96,7 @@ Est-ce l'effet de :
 
 ## Quels sont les points d'optimisation d'un service numérique python ?
 - algorithmie
-- architecture 
+- architecture
 - optimisation du runtime
 ---
 
@@ -121,11 +121,21 @@ Est-ce l'effet de :
 
 ### Optimisation du runtime SEB
 
+- Compilation optimization
+  - Compiler level Optimization
+  - Profile Guided Optimization
+- Link Time Optimization (Whole program optimisation)
+- Post link optimization -> Bolt LLVM
+
+
+- `python3 -m sysconfig | grep CONFIG_ARGS`
+
+
 - options de compilation de l'interpréteur python
 
 ---
 
-#TODO details des flags de compile 
+#TODO details des flags de compile
 
 détails des flags dans les images
 

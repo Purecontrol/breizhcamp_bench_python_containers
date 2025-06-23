@@ -30,60 +30,128 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ## Qui sommes-nous ?
 
+- Luc Sorel-Giffo : lead dev [See you sun](https://seeyousun.fr/) (co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/))
 - Sébastien Baguet : devOps [Purecontrol](https://www.purecontrol.com/)
 - Gaston Gary : dev [Purecontrol](https://www.purecontrol.com/)
-- Luc Sorel-Giffo : lead dev [See you sun](https://seeyousun.fr/) (co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/))
-
-
----
-## Le service numérique à conteneuriser : local-processing GG
-
-quick intro
-
----
-### Schema architecture et présentation GG
-![width:850px](media/archi.drawio.svg)
-
----
-### key points archi GG
-
-Les specificités propres à LP, objectif d'amélioration et de bonne pratique d'ingenerie logiciel >>> on veut dockeriser
 
 ---
 
-### Déploiement manuel sur une VM dédiée ? GG
+### Luc Sorel-Giffo
 
-- utilisation du binaire python distribué avec le système
-- dépendances installées sur le système
-- git pull + mise à jour des dépendances
-- déploiement manuel
+* **Tech lead** chez **See you sun**.
+* **Expert Python** pendant un et demi chez **Purecontrol**.
+* **Consultant formateur Python** pendant 6 ans chez **Zenika**. 
+* **Co-fondateur** communauté **Python-Rennes**.
+* **génération de documentation** à partir du code source, soit par **analyse statique** (py2puml), soit par **traçage d’exécution** (pydoctrace).
 
-![](https://s2.qwant.com/thumbr/474x303/7/7/c159a4416cf1b30fea194a49da801d59f966c0e2d414580ef384f01760efe7/th.jpg?u=https%3A%2F%2Ftse.mm.bing.net%2Fth%3Fid%3DOIP.ZIaKioLPt65-c3ntAHQewgHaEv%26pid%3DApi&q=0&b=1&p=0&a=0)
+---
 
-### Conteneurisation Docker GG
+### Sébastien Baguet
+
+* **Infra lead** chez **Purecontrol**.
+* spécialisé dans **l’infrastructure open source**, **l’automatisation** et la **scalabilité** des systèmes.
+* Ancien responsable infrastructure chez **ARIADNEXT by IDNow**.
+* **Direction des projets R&D** en Big Data et en machine learning.
+* Expertises en **bas niveau** (embarqué, électronique, réparation), aux applicatifs **Linux**, en passant par le **kernel**. 
+* Intérêt pour **l’impact environnemental** des technologies.
+
+---
+
+### Gaston Gary 
+
+* développeur Python depuis 3 ans chez **Purecontrol**
+* Responsable de la récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
+* interconnexions à des APIs
+* Responsable d'un service de calcul de timeseries prénommé ...
+
+---
+
+## local-processing
+
+* Traitement et agrégation de **séries temporelles**
+* En continu
+* Plus de **50 000 calculs par minute**
+* Données en sortie utilisées pour différent cas d'usage: Pilotage, alerting, dashboarding.
+* Objectif : **0 latence**
+
+---
+
+### Quand je suis arrivé...
+
+- utilisation du python systeme.
+- Pas de **virtualenv**
+- Aucun test
+- Un unique gros fichier Python
+- Un seul serveur pour prod **et** dev
+- Git utilisé comme **sauvegarde** du serveur.
+
+![bg right](https://s2.qwant.com/thumbr/474x303/7/7/c159a4416cf1b30fea194a49da801d59f966c0e2d414580ef384f01760efe7/th.jpg?u=https%3A%2F%2Ftse.mm.bing.net%2Fth%3Fid%3DOIP.ZIaKioLPt65-c3ntAHQewgHaEv%26pid%3DApi&q=0&b=1&p=0&a=0)
+
+---
+
+### à mettre en place
+
+Professionnaliser par **itérations**.
+  
+On est passé d’un script artisanal à une **application solide** :
+
+- **factorisation** quand c'est possible
+- **conteneurisation** de l'application via **docker** 
+- mise en place des **tests unitaires**
+- création un workflow **d'intégration et développement continu**
+
+---
+
+<!-- _class: lead -->
+### Schema architecture et présentation
+
+---
+
+![bg right;width:850px](media/archi.drawio.svg)
+
+---
+
+### key points architecture
+
+- **MainService**
+  - **Thread**: soumission des tâches à ProcessPoolexecutor 
+  - **boucle infini**
+    - monitoring
+    - update tasks output status
+
+- **Worker**
+  - traitement **unitaire** d'une tache
+  - **récupération** des données temporelles en entrée
+  - **transformation**
+  - **écriture** de la série temporelle en output
+
+On peut voir qu'il y a beaucoup de parallélisme, beaucoup d'io réseau.
+
+---
+
+### Conteneurisation Docker
 
 ```dockerfile
 FROM python:3.12-slim
-
 # installation des dépendances
 # copie des sources
 ...
 ```
 
-L'image embarque tout :
-- le binaire Python (passage de 3.8 à 3.12 au passage)
+- le binaire Python
 - les dépendances
 - le code source
-- reproductibilité de l'environnement applicatif
-- montée de version automatisable de l'application
+
+-> une reproductibilité de l'environnement applicatif
+-> montée de version automatisable de l'application
 
 ---
 
-### Oui mais... GG
+### Oui mais... perte de performance de 30% ! 
 
-Pertes de performance de 30% !
+![bg right](https://www.petitgoeland.fr/849954-large_default/sweat-homme-col-rond-le-futur-c-etait-mieux-avant.jpg)
 
-![width:300px](https://www.petitgoeland.fr/849954-large_default/sweat-homme-col-rond-le-futur-c-etait-mieux-avant.jpg)
+On observe une **diminution** du nombre d'équipements calculés chaque minute de **30%**, entrainant une **latence** du systeme.
 
 ---
 
@@ -184,27 +252,109 @@ voir :
 
 ---
 
-### ATTENTION GG
-l'utilisation du flag peut vous rendre dépendant de l'architecture CPU.
-nécessaire d'avoir la meme archi CPU entre le build et le run.
+### Attention aux options de compilation
 
-Temps de compilation de l'interpreteur
-l'image peut prendre du temps à build.
-stocker l'image déjà compilé dans une registry.
+Si les flags de compilation énoncés plus haut peuvent sembler optimaux,
+Il y a  tout de même quelques point important à garder en tête ...
 
 ---
 
+###  ils introduisent des **dépendances invisibles** à l’architecture CPU
 
-## Benchmarking methodo et resultat GG
+- On **compile** l’interpréteur Python **spécifiquement** pour l’architecture du **CPU**.
+- Résultat : l’image **ne fonctionne plus** si on la lance sur une autre architecture (ex: `build` sur AMD → `run` sur INTEL)
 
-* comment enquêter ?
-  * métriques bas niveau du conteneur (ram, cpu) : `cadvisor`
-  * logs métier (nb de tâches traitées, durée moyenne de traitement d'une tâche)
-  * profilage du temps passé : kcachegrind
+- Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**.
 
 ---
+
+###  Build ≠ Run
+
+Il est donc **crucial** d’avoir la **même architecture CPU** entre :
+
+- La machine qui **build** l’image Docker
+- Et la machine qui **exécute** l’image
+
+Sinon ➜ crash, `illegal instruction`.
+
+---
+
+###  Build time
+
+ Compiler l’interpréteur python **prend du temps** :
+
+- Plusieurs minutes
+- redondant d'un build à l'autre.
+
+chez nous, la compilation prend : 
+![](media/buildtime.png)
+
+---
+
+### Bonne pratique
+
+ **Construisez l’image une fois**, puis :
+
+- Stockez-la dans une **registry**
+- **Réutilisez-la** sur toutes les machines compatibles, et toutes les applications python compatible.
+
+Ne reconstruisez pas l’image inutilement à chaque run.
+
+![bg right](media/buildworkflow.drawio.svg)
+
+---
+
+## Benchmarking : par où commencer ? 
+
+ **Comment enquêter sur les perfs d’un conteneur ?**
+
+---
+
+## 1- Métriques bas niveau système
+
+Utilisation de `cadvisor`  
+Pour suivre en temps réel :
+
+- l'usage Mémoire
+- l'usage CPU
+- l'usage I/O disque & réseau
+
+Idéal pour détecter une **saturation système un éventuel bottleneck**
+
+---
+
+## 2- Métriques et logs niveau applicatif
+
+Exploiter les **logs et métriques** pour suivre :
+
+- Nombre de tâches traitées par minute
+- Durée moyenne de traitement par tâche
+- Les tâches en echecs.
+
+Permet d'avoir une vision fonctionnelle de la performance de notre application.
+
+---
+
+## 3- Profilage du code
+
+Utiliser un profiler comme `kcachegrind` sur les résultats de Cprofile.
+
+Pour visualiser :
+
+- Fonctions les plus coûteuses
+- Appels imbriqués
+- Consommation CPU par bloc de code
+
+En comparant avant et après, cela pourrait permettre d'identifier un endroit ou l'on passe plus de temps, responsable d'une perte de performance.
+
+```python
+python -m cProfile -o prof.out my_app.py && pyprof2calltree -i prof.out -o callgrind.out && kcachegrind callgrind.out
+```
+---
+
 
 ### présentation du bench et des différentes images LUC
+
 ---
 
 ### résultats LUC

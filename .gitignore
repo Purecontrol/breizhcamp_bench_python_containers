@@ -2,3 +2,5 @@
 slides/slideshow.html
 # benchmark results
 1_build_times/
+2_benchmark_results/
+prometheus-data/

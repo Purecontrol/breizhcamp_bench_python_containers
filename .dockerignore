@@ -8,3 +8,7 @@
 !Dockerfile.pyenv.fullopt
 !Dockerfile.pyenv.miopt
 !Dockerfile.uv
+# marimo notebook
+!Dockerfile.marimo
+!requirements.marimo.txt
+!notebook.py

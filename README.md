@@ -92,3 +92,37 @@ RUN uv python install 3.12.11
 bash 1_images_build_time.sh
 # -> résultats dans le dossier 1_build_times/ (non versionné)
 ```
+
+### Performances des images applicatives
+
+```sh
+# 1. lancer le benchmark
+bash 2_monitor_benchmark.sh &> "2_benchmark_results/$(date '+%Y-%m-%d_%H%M%S')-benchmark_monitoring.txt"
+
+# 2. plus tard, lancer prometheus et grafana pour visualiser les consommations CPU et RAM
+docker compose -f docker-compose.monitoring.yml up grafana
+
+# 3. ouvrir les dashboards grafana
+http://127.0.0.1:9100/dashboards
+
+# 4. importer le dashboard 193 (https://grafana.com/grafana/dashboards/193-docker-monitoring/) en sélectionnant la source de données Prometheus
+
+# 5. exporter les données CPU et RAM
+
+# notes :
+# - arrête les conteneurs
+docker compose -f docker-compose.monitoring.yml stop
+# - arrête et supprime les conteneurs
+docker compose -f docker-compose.monitoring.yml down
+```
+
+### Notebook d'analyse du benchmark
+
+Documentation :
+
+- https://docs.marimo.io/guides/deploying/deploying_docker/
+- https://docs.marimo.io/cli/#marimo-edit
+
+```sh
+docker compose -f docker-compose.notebook.yml up
+```

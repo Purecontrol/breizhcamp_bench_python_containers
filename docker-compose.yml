@@ -8,7 +8,7 @@ services:
         PYTHON_VERSION: "3.12.11-slim-bookworm"
     volumes:
       - ./config.json:/config.json
-      - ./results:/results
+      - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: official
   pyenvfullopt:
@@ -20,7 +20,7 @@ services:
         PYTHON_VERSION: "3.12.11"
     volumes:
       - ./config.json:/config.json
-      - ./results:/results
+      - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: pyenvfullopt
   pyenvmiopt:
@@ -32,11 +32,11 @@ services:
         PYTHON_VERSION: "3.12.11"
     volumes:
       - ./config.json:/config.json
-      - ./results:/results
+      - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: pyenvmiopt
   pyenvbasic:
-    container_name: bench_pyenv_basic
+    container_name: bench_pyenvbasic
     build:
       context: .
       dockerfile: Dockerfile.pyenv.basic
@@ -44,7 +44,7 @@ services:
         PYTHON_VERSION: "3.12.11"
     volumes:
       - ./config.json:/config.json
-      - ./results:/results
+      - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: pyenvbasic
   uv:
@@ -56,6 +56,6 @@ services:
         PYTHON_VERSION: "3.12.11"
     volumes:
       - ./config.json:/config.json
-      - ./results:/results
+      - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: uv

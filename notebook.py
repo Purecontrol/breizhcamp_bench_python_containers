@@ -21,15 +21,50 @@ def _():
 def _(pprint_dict):
     from json import load
     from os import getenv
+    from pathlib import Path
+
     BENCHMARK_SOURCES_CONFIG_FILE = getenv("BENCHMARK_SOURCES_CONFIG_FILE")
+    print(f"Fichier de configuration de l'analyse : {BENCHMARK_SOURCES_CONFIG_FILE}")
+
+    def check_file_exist(file_to_check: Path, description: str) -> Path:
+        if file_to_check.exists():
+            print(f"✅ Le fichier de {description} '{file_to_check}' existe bien.")
+        else:
+            print(f"❌ Le fichier de {description} '{file_to_check}' n'existe pas ou est mal nommé.")
+        return file_to_check
+
     with open(BENCHMARK_SOURCES_CONFIG_FILE, encoding="utf-8") as config_file:
-        analysis_config = load(config_file)
-        pprint_dict(analysis_config)
-    return (analysis_config,)
+        _analysis_config = load(config_file)
+        pprint_dict(_analysis_config)
+
+        _BUILD_RESULTS_DIR = Path(_analysis_config["build_results_dir"])
+        BUILD_TIMES_FILE = check_file_exist(_BUILD_RESULTS_DIR / _analysis_config["build_times"], "temps de construction des images")
+        _BENCHMARK_RESULTS_DIR = Path(_analysis_config["benchmark_results_dir"])
+        CPU_USAGE_FILE = check_file_exist(_BENCHMARK_RESULTS_DIR / _analysis_config["cpu_usage"], "consommation CPU")
+        RAM_USAGE_FILE = check_file_exist(_BENCHMARK_RESULTS_DIR / _analysis_config["ram_usage"], "consommation RAM")
+
+        IMAGE_NAMES = tuple(_analysis_config["images"].keys())
+        COLORS_BY_IMAGE: dict[str, str] = {
+            image_name: image_dict["color"]
+            for image_name, image_dict in _analysis_config["images"].items()
+        }
+        RESULTS_BY_IMAGE: dict[str, Path] = {
+            image_name: check_file_exist(_BENCHMARK_RESULTS_DIR / f"{image_dict['results_prefix']}_{image_name}.json", f"résultats pour l'image {image_name}")
+            for image_name, image_dict in _analysis_config["images"].items()
+        }
+   
+    return (
+        BUILD_TIMES_FILE,
+        COLORS_BY_IMAGE,
+        CPU_USAGE_FILE,
+        IMAGE_NAMES,
+        Path,
+        RAM_USAGE_FILE,
+    )
 
 
 @app.cell
-def _(analysis_config):
+def _(BUILD_TIMES_FILE, COLORS_BY_IMAGE: dict[str, str], Path):
     from re import compile as re_compile, Pattern
 
     # récupération du temps de compilation et de la taille de chaque image
@@ -61,40 +96,50 @@ def _(analysis_config):
                         }
                         return build_stats
 
-    def scrap_images_build_time_and_size(analysis_config: dict) -> dict:
+    def scrap_images_build_time_and_size(build_times_path: Path, colors_by_image: dict[str, str]) -> dict:
         stats_by_image = {}
-        with open(analysis_config["build_times"], encoding="utf-8") as build_time_file:
-            while (file_line := next(build_time_file, None)) is not None:
+        with open(build_times_path, encoding="utf-8") as build_times_file:
+            while (file_line := next(build_times_file, None)) is not None:
                 image_name_match = IMAGE_START_PATTERN.search(file_line)
                 if image_name_match:
                     image_name = image_name_match.group(1)
                     stats_by_image[image_name] = {
-                        "color": analysis_config["colors"][image_name]
-                    } | scrap_image_build_time_and_size(build_time_file)
+                        "color": colors_by_image[image_name]
+                    } | scrap_image_build_time_and_size(build_times_file)
 
         return stats_by_image
 
-    stats_by_image = scrap_images_build_time_and_size(analysis_config)
+    stats_by_image = scrap_images_build_time_and_size(BUILD_TIMES_FILE, COLORS_BY_IMAGE)
     # pprint_dict(stats_by_image)
     return (stats_by_image,)
 
 
 @app.cell
-def _(analysis_config, go, pl, stats_by_image):
+def _(
+    COLORS_BY_IMAGE: dict[str, str],
+    CPU_USAGE_FILE,
+    IMAGE_NAMES,
+    Path,
+    RAM_USAGE_FILE,
+    go,
+    pl,
+    pprint_dict,
+    stats_by_image,
+):
     # affichage des consommations CPU et RAM
 
     from polars import DataFrame, read_csv, from_epoch
     from polars.datatypes.classes import Float64, Int64
 
-    benchmark_image_columns = [f"bench_{image}" for image in analysis_config["colors"]]
+    benchmark_image_columns = [f"bench_{image_name}" for image_name in IMAGE_NAMES]
 
-    def load_dataframe(data_file: str, values_datatype) -> DataFrame:
+    def load_dataframe(data_file: Path, values_datatype) -> DataFrame:
         # https://docs.pola.rs/api/python/stable/reference/api/polars.read_csv.html
         return read_csv(
             data_file,
             # sélection et renommage des colonnes
             columns=["Time", *benchmark_image_columns],
-            new_columns=["Time", *analysis_config["colors"]],
+            new_columns=["Time", *IMAGE_NAMES],
             null_values="undefined",
             infer_schema=False,
             schema_overrides={"Time": Int64} | {
@@ -103,8 +148,9 @@ def _(analysis_config, go, pl, stats_by_image):
             }
         ).with_columns(from_epoch("Time", time_unit="ms"))
 
-    cpu_df = load_dataframe(analysis_config["cpu_usage"], Float64)
-    ram_df = load_dataframe(analysis_config["ram_usage"], Int64)
+
+    cpu_df = load_dataframe(CPU_USAGE_FILE, Float64)
+    ram_df = load_dataframe(RAM_USAGE_FILE, Int64)
 
     def plot_timeseries(df: DataFrame, colors_by_image: dict, title: str=""):
         image_timeseries = [
@@ -121,7 +167,7 @@ def _(analysis_config, go, pl, stats_by_image):
         fig.update_layout(title=title, showlegend=True)
         fig.show()
 
-    def narrow_cpu_df(values_df: DataFrame, colors_by_image: dict) -> tuple[DataFrame, dict]:
+    def narrow_cpu_df(values_df: DataFrame, image_names: list[str]) -> tuple[DataFrame, dict]:
         narrowed_df = values_df.select(values_df.columns).with_columns(
             **{
                 image_column: pl.when(
@@ -134,13 +180,13 @@ def _(analysis_config, go, pl, stats_by_image):
 
         return narrowed_df, {
             image_name: cpu_mean_values[0]
-            for image_name, cpu_mean_values in narrowed_df.select(colors_by_image.keys()).mean().to_dict(as_series=False).items()
+            for image_name, cpu_mean_values in narrowed_df.select(image_names).mean().to_dict(as_series=False).items()
         }
 
-    narrowed_cpu_df, cpu_mean_by_image = narrow_cpu_df(cpu_df, analysis_config["colors"])
+    narrowed_cpu_df, cpu_mean_by_image = narrow_cpu_df(cpu_df, IMAGE_NAMES)
     # pprint_dict(cpu_mean_by_image)
-    plot_timeseries(cpu_df, analysis_config["colors"], "Évolution des consommations CPU des différentes images")
-    plot_timeseries(narrowed_cpu_df, analysis_config["colors"], "Évolution des CPU des différentes images sans les rampes")
+    plot_timeseries(cpu_df, COLORS_BY_IMAGE, "Évolution des consommations CPU des différentes images")
+    plot_timeseries(narrowed_cpu_df, COLORS_BY_IMAGE, "Évolution des CPU des différentes images sans les rampes")
 
     def narrow_ram_df(values_df: DataFrame, nullifier_df: DataFrame) -> DataFrame:
         return pl.concat(
@@ -162,12 +208,12 @@ def _(analysis_config, go, pl, stats_by_image):
 
     narrowed_ram_df = narrow_ram_df(ram_df, narrowed_cpu_df)
 
-    plot_timeseries(ram_df, analysis_config["colors"], "Évolution des consommations RAM des différentes images")
-    plot_timeseries(narrowed_ram_df, analysis_config["colors"], "Évolution des RAM des différentes images sans les rampes")
+    plot_timeseries(ram_df, COLORS_BY_IMAGE, "Évolution des consommations RAM des différentes images")
+    plot_timeseries(narrowed_ram_df, COLORS_BY_IMAGE, "Évolution des RAM des différentes images sans les rampes")
 
     ram_mean_by_image = {
         image_name: ram_mean_values[0]
-        for image_name, ram_mean_values in narrowed_ram_df.select(analysis_config["colors"].keys()).mean().to_dict(as_series=False).items()
+        for image_name, ram_mean_values in narrowed_ram_df.select(COLORS_BY_IMAGE.keys()).mean().to_dict(as_series=False).items()
     }
     # pprint_dict(ram_mean_by_image)
 
@@ -182,7 +228,7 @@ def _(analysis_config, go, pl, stats_by_image):
             "unit": "Mo"
         }
 
-    # pprint_dict(stats_by_image)
+    pprint_dict(stats_by_image)
 
     return
 

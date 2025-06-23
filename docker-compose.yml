@@ -1,4 +1,14 @@
 services:
+  debian:
+    container_name: bench_debian
+    build:
+      context: .
+      dockerfile: Dockerfile.debian
+    volumes:
+      - ./config.json:/config.json
+      - ./2_benchmark_results:/results
+    environment:
+      IMAGE_NAME: debian
   official:
     container_name: bench_official
     build:
@@ -11,42 +21,6 @@ services:
       - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: official
-  pyenvfullopt:
-    container_name: bench_pyenvfullopt
-    build:
-      context: .
-      dockerfile: Dockerfile.pyenv.fullopt
-      args:
-        PYTHON_VERSION: "3.12.11"
-    volumes:
-      - ./config.json:/config.json
-      - ./2_benchmark_results:/results
-    environment:
-      IMAGE_NAME: pyenvfullopt
-  pyenvbolt:
-    container_name: bench_pyenvbolt
-    build:
-      context: .
-      dockerfile: Dockerfile.pyenv.bolt
-      args:
-        PYTHON_VERSION: "3.12.11"
-    volumes:
-      - ./config.json:/config.json
-      - ./2_benchmark_results:/results
-    environment:
-      IMAGE_NAME: pyenvbolt
-  pyenvmiopt:
-    container_name: bench_pyenvmiopt
-    build:
-      context: .
-      dockerfile: Dockerfile.pyenv.miopt
-      args:
-        PYTHON_VERSION: "3.12.11"
-    volumes:
-      - ./config.json:/config.json
-      - ./2_benchmark_results:/results
-    environment:
-      IMAGE_NAME: pyenvmiopt
   pyenvbasic:
     container_name: bench_pyenvbasic
     build:
@@ -59,6 +33,42 @@ services:
       - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: pyenvbasic
+  pyenvopt:
+    container_name: bench_pyenvopt
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv.opt
+      args:
+        PYTHON_VERSION: "3.12.11"
+    volumes:
+      - ./config.json:/config.json
+      - ./2_benchmark_results:/results
+    environment:
+      IMAGE_NAME: pyenvopt
+  pyenvoptmarch:
+    container_name: bench_pyenvoptmarch
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv.optmarch
+      args:
+        PYTHON_VERSION: "3.12.11"
+    volumes:
+      - ./config.json:/config.json
+      - ./2_benchmark_results:/results
+    environment:
+      IMAGE_NAME: pyenvoptmarch
+  pyenvoptmarchbolt:
+    container_name: bench_pyenvoptmarchbolt
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv.optmarchbolt
+      args:
+        PYTHON_VERSION: "3.12.11"
+    volumes:
+      - ./config.json:/config.json
+      - ./2_benchmark_results:/results
+    environment:
+      IMAGE_NAME: pyenvoptmarchbolt
   uv:
     container_name: bench_uv
     build:

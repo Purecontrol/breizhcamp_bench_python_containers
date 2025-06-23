@@ -96,6 +96,9 @@ bash 1_images_build_time.sh
 ### Performances des images applicatives
 
 ```sh
+# 0. construire les images
+docker compose -f docker-compose.yml build
+
 # 1. lancer le benchmark
 bash 2_monitor_benchmark.sh &> "2_benchmark_results/$(date '+%Y-%m-%d_%H%M%S')-benchmark_monitoring.txt"
 
@@ -107,7 +110,7 @@ http://127.0.0.1:9100/dashboards
 
 # 4. importer le dashboard 193 (https://grafana.com/grafana/dashboards/193-docker-monitoring/) en sélectionnant la source de données Prometheus
 
-# 5. exporter les données CPU et RAM
+# 5. exporter les données CPU et RAM (toutes les séries, sans pré-formatage) en fichier CSV ; les enregistrer dans 2_benchmark_results
 
 # notes :
 # - arrête les conteneurs
@@ -118,11 +121,53 @@ docker compose -f docker-compose.monitoring.yml down
 
 ### Notebook d'analyse du benchmark
 
-Documentation :
+Documentation marimo :
 
 - https://docs.marimo.io/guides/deploying/deploying_docker/
 - https://docs.marimo.io/cli/#marimo-edit
 
 ```sh
 docker compose -f docker-compose.notebook.yml up
+```
+
+Le notebook prend lit la variable d'environnement `BENCHMARK_SOURCES_CONFIG_FILE` indiquant le fichier JSON de configuration de l'analyse.
+Ce fichier a le format suivant :
+
+```js
+{
+    "build_results_dir": "1_build_times",
+    "build_times": "2025-06-22_135819-build_times.txt",
+    "benchmark_results_dir": "2_benchmark_results",
+    "cpu_usage": "2025-06-23_134155-CPU_Usage-data-as-joinbyfield.csv",
+    "ram_usage": "2025-06-23_134155-Memory_Usage-data-as-joinbyfield.csv",
+    "images": {
+        "debian": {
+            // couleur utilisée pour les graphiques de cette image docker
+            "color": "#A80030",
+            // début du fichier, sans le nom de l'image ni l'extension ("2025-06-23T02-58-28" pour "2025-06-23T02-58-28_debian.json")
+            "results_prefix": ""
+        },
+        // etc. pour chaque image du benchmark
+        "official": {
+            "color": "#FFD43B",
+            "results_prefix": ""
+        },
+        "pyenvbasic": {
+            "color": "#07B08C",
+            "results_prefix": ""
+        },
+        "pyenvmiopt": {
+            "color": "#05765D",
+            "results_prefix": ""
+        },
+        "pyenvfullopt": {
+            "color": "#034C3C",
+            "results_prefix": ""
+        },
+        "uv": {
+            "color": "#AB47BC",
+            "results_prefix": ""
+        }
+    }
+}
 ```

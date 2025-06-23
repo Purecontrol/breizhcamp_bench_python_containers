@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# création du dossier stockant les résultats du benchmark
+mkdir -p 2_benchmark_results/
+
 now () {
     echo "$(date '+%Y-%m-%d_%H%M%S')"
 }
@@ -23,11 +26,12 @@ sudo rm -fr prometheus-data
 echo "= [$(now)] démarrage de cadvisor et prometheus"
 docker compose -f docker-compose.monitoring.yml up --remove-orphans --detach cadvisor prometheus
 
+run_benchmark debian
 run_benchmark official
 run_benchmark pyenvbasic
-run_benchmark pyenvmiopt
-run_benchmark pyenvfullopt
-run_benchmark pyenvbolt
+run_benchmark pyenvopt
+run_benchmark pyenvoptmarch
+run_benchmark pyenvoptmarchbolt
 run_benchmark uv
 
 echo "= [$(now)] Arrêt des conteneurs de monitoring"

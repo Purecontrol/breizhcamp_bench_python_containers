@@ -3,10 +3,12 @@
 !benchmark.py
 !config.json
 # benchmarked images
+!Dockerfile.debian
 !Dockerfile.official
 !Dockerfile.pyenv.basic
-!Dockerfile.pyenv.fullopt
-!Dockerfile.pyenv.miopt
+!Dockerfile.pyenv.opt
+!Dockerfile.pyenv.optmarch
+!Dockerfile.pyenv.optmarchbolt
 !Dockerfile.uv
 # marimo notebook
 !Dockerfile.marimo

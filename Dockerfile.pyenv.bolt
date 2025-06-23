@@ -8,8 +8,10 @@ RUN apt-get update && \
         build-essential curl git ca-certificates \
         libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
         libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
-        libffi-dev liblzma-dev  && \
+        libffi-dev liblzma-dev llvm-bolt libbolt-dev  && \
     rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/lib/llvm-18/lib/libbolt_rt_instr.a /usr/lib/libbolt_rt_instr.a
 
 ENV PYENV_ROOT=/python
 RUN curl -fsSL https://pyenv.run | bash

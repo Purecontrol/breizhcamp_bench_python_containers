@@ -23,6 +23,18 @@ services:
       - ./2_benchmark_results:/results
     environment:
       IMAGE_NAME: pyenvfullopt
+  pyenvbolt:
+    container_name: bench_pyenvbolt
+    build:
+      context: .
+      dockerfile: Dockerfile.pyenv.bolt
+      args:
+        PYTHON_VERSION: "3.12.11"
+    volumes:
+      - ./config.json:/config.json
+      - ./2_benchmark_results:/results
+    environment:
+      IMAGE_NAME: pyenvbolt
   pyenvmiopt:
     container_name: bench_pyenvmiopt
     build:

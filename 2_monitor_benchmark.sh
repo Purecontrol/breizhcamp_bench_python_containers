@@ -27,6 +27,7 @@ run_benchmark official
 run_benchmark pyenvbasic
 run_benchmark pyenvmiopt
 run_benchmark pyenvfullopt
+run_benchmark pyenvbolt
 run_benchmark uv
 
 echo "= [$(now)] Arrêt des conteneurs de monitoring"

@@ -2,6 +2,9 @@
 # à exécuter du répertoire racine : bash 1_images_build_time.sh
 set -e
 
+
+mkdir -p 1_build_times/
+
 now () {
     echo "$(date '+%Y-%m-%d_%H%M%S')"
 }
@@ -28,3 +31,4 @@ clean_build uv
 clean_build pyenvbasic
 clean_build pyenvmiopt
 clean_build pyenvfullopt
+clean_build pyenvbolt

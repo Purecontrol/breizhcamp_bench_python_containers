@@ -30,19 +30,12 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ## Qui sommes-nous ?
 
-- Luc Sorel-Giffo : lead dev [See you sun](https://seeyousun.fr/) (co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/))
-- Sébastien Baguet : devOps [Purecontrol](https://www.purecontrol.com/)
-- Gaston Gary : dev [Purecontrol](https://www.purecontrol.com/)
-
----
-
-### Luc Sorel-Giffo
-
-- **Tech lead** chez **See you sun**.
-- **Expert Python** pendant un et demi chez **Purecontrol**.
-- **Consultant formateur Python** pendant 6 ans chez **Zenika**. 
-- **Co-fondateur** communauté **Python-Rennes**.
-- **génération de documentation** à partir du code source, soit par **analyse statique** (py2puml), soit par **traçage d’exécution** (pydoctrace).
+* Sébastien Baguet : devOps [Purecontrol](https://www.purecontrol.com/)
+* Gaston Gary : dev [Purecontrol](https://www.purecontrol.com/)
+* Luc Sorel-Giffo : lead dev [See you sun](https://seeyousun.fr/)
+  - ex-Purecontrol 🫶
+  - co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/) 🔔
+  - [@lucsorelgiffo@floss.social](https://floss.social/@lucsorelgiffo)
 
 ---
 
@@ -70,11 +63,13 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ## Applicatif métier local-processing
 
-- Traitement et agrégation de **séries temporelles**
-- En temps réel
-- Plus de **50 000 tâches par minute**
-- Génération de données synthétiques utilisées en entrées par d'autres briques métiers. 
-- Objectif : **pas de retard**
+(titre alternatif : Une antiquité bien dynamique)
+
+- traitement et agrégation de **séries temporelles**
+- données synthétiques utilisées par d'autres briques métier
+- **50 000+ tâches par minute**
+- en temps réel
+- impératif : **ne pas accumuler de retard**
 
 ---
 
@@ -96,47 +91,54 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
   - **transformation**
   - **écriture** de la série temporelle en output
 
-On peut voir qu'il y a beaucoup de parallélisme, beaucoup d'io réseau.
+-> parallélisme +++, IO réseau ++, CPU + (traitement des données)
 
 ---
 
-### déploiement old school
+### Déploiement old school
 
-- utilisation du python systeme.
-- Pas de **virtualenv**.
-- Déployé sur une VM a la main.
-![bg right](https://s2.qwant.com/thumbr/474x303/7/7/c159a4416cf1b30fea194a49da801d59f966c0e2d414580ef384f01760efe7/th.jpg?u=https%3A%2F%2Ftse.mm.bing.net%2Fth%3Fid%3DOIP.ZIaKioLPt65-c3ntAHQewgHaEv%26pid%3DApi&q=0&b=1&p=0&a=0)
+- interpréteur python de la VM
+- git pull (à la main en SSH)
+- installation des dépendances sans **.venv/**
+- redémarrage 🤞
+
+![bg right](media/vm-museum.png)
 
 ---
 
 ### Conteneurisation Docker
 
 ```dockerfile
-FROM python:3.12-slim
+ARG PYTHON_VERSION
+FROM python:{PYTHON_VERSION}-slim
 # installation des dépendances
 # copie des sources
+# lancement de l'application
 ...
 ```
 
-- le binaire Python
-- les dépendances
-- le code source
+Avantages classiques d'une image :
+- isolation et maitrise du binaire python + dépendances + code source
+- exécution iso dev / tests / prod
+- déploiement : rapide, automatisable, serein
 
--> une reproductibilité de l'environnement applicatif
--> montée de version automatisable de l'application
+On en profite pour passer de 3.8 à 3.12 😁
 
 ---
 
 ### Oui mais... perte de performance de 30% ! 
 
-![bg right](https://www.petitgoeland.fr/849954-large_default/sweat-homme-col-rond-le-futur-c-etait-mieux-avant.jpg)
+![bg right](media/futur-c-etait-mieux-avant.jpg)
 
-On observe une **diminution** du nombre d'équipements calculés chaque minute de **30%**, entrainant une **latence** du systeme.
+- **diminution** du nombre de tâches calculées chaque minute de **30%**
+- accumulation rapide de **retard**
+- optimisation dégradée des pilotages
 
 ---
 
-Est-ce l'effet de :
-* la conteneurisation et l'allocation de ressources (CPU / RAM, overhead réseau) ?
+### 🤔 Est-ce l'effet de :
+
+- la conteneurisation et l'allocation de ressources (CPU / RAM, overhead réseau) ?
 * la dockerisation (comportement des binaires) ?
 * la montée de version de Python ?
 
@@ -148,22 +150,76 @@ Est-ce l'effet de :
 - optimisation du runtime
 ---
 
-### algorithmie LUC
+### Algorithmie - 1
 
- (list comprehension: python c'est lent, rediriger vers code compilé, C Rust numpy compréhension)
+```python
+cursor.execute(t"SELECT * FROM tasks LIMIT 100")
+tasks = []
+for record in cursor:
+  tasks.append(Task.from_db_record(record))
+execute_tasks(tasks)
+```
+
+```python
+tasks = [
+  Task.from_db_record(record)
+  for record in cursor
+] # le corps de la compréhension est exécuté "d'un coup"
+```
+
+```python
+execute_tasks(
+  Task.from_db_record(record) for record in cursor
+) # générateur streamant les tâches
+```
 
 ---
 
-### architecture LUC
+### Algorithmie - 2
 
- (gestion des connexions à des bdd, IO, concurrence et parallélisation -> évoquer le `global interpreter lock`)
+- Python est un langage interprété 🐌
+* facilite l'encapsulation de binaires pour les traitements CPU ⚡
+  - numpy, pandas, polars
+  - Tensorflow, pytorch, jax
 
 ---
 
-### Optimisation de l'execution
+### Architecture
 
-`python -O mon_script.py` (docstrings supprimées, asserts ignorés, à compléter)
-- just in time compilation JIT
+- multithreading ou asyncio pour paralléliser les opérations IO
+  * ⚠️ au `global interpreter lock`
+  * désactivable dans la 3.14
+* multiprocessing pour les opérations CPU
+
+---
+
+### Optimisation de l'exécution - 1
+
+```python
+def transfer_money(amount: float, account):
+  """ Adds a positive amount of money to the given account """
+  assert is_a_valid_amount(amount)
+  account.add(amount)
+```
+
+`python -O mon_script.py` supprime :
+  - `-O` : les assertions, les blocs `if __debug__:`
+  - `-OO` : les docstrings aussi
+
+Éviter d'exprimer les vérifications métier avec des `assert`
+- ignorées en mode optimize (voir la doc [cmdoption-O](https://docs.python.org/3/using/cmdline.html#cmdoption-O))
+- try-except : tout devient `AssertionError`
+
+---
+
+### Optimisation de l'exécution - 2
+
+🧪 Just-in-time compiler (3.13+) :
+- modification du bytecode au fil de l'exécution du programme
+* additionner des entiers `!=` additionner des décimaux
+* 🔎 l'interpréteur doit avoir été compilé avec cette option d'exécution
+
+Voir [whatsnew313-jit-compiler](https://docs.python.org/3/whatsnew/3.13.html#whatsnew313-jit-compiler)
 
 ---
 

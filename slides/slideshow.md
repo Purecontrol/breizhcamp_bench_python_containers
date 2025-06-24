@@ -57,12 +57,12 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 - spécialisé dans **l’infrastructure open source**, **l’automatisation** et la **scalabilité** des systèmes.
 - Ancien responsable infrastructure chez **ARIADNEXT by IDNow**.
 - **Direction des projets R&D** en Big Data et en machine learning.
-- Expertises en **bas niveau** (embarqué, électronique, réparation), aux applicatifs **Linux**, en passant par le **kernel**. 
+- Expertises en **bas niveau** (embarqué, électronique, réparation), aux applicatifs **Linux**, en passant par le **kernel**.
 - Intérêt pour **l’impact environnemental** des technologies.
 
 ---
 
-### Gaston Gary 
+### Gaston Gary
 
 - développeur Python depuis 3 ans chez **Purecontrol**
 - Responsable récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
@@ -95,7 +95,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 ---
 
 - **MainService**
-  - **Thread**: soumission des tâches à ProcessPoolexecutor 
+  - **Thread**: soumission des tâches à ProcessPoolexecutor
   - **boucle infinie**
     - monitoring
     - update tasks output status
@@ -105,7 +105,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
   - **récupération** des données temporelles en entrée
   - **transformation**
   - **écriture** de la série temporelle en output
-<!-- 
+<!--
 -> parallélisme +++, IO réseau ++, CPU + (traitement des données) -->
 ---
 
@@ -140,7 +140,7 @@ On en profite pour passer de 3.8 à 3.12 😁
 
 ---
 
-### Oui mais... perte de performance de 30% ! 
+### Oui mais... perte de performance de 30% !
 
 ![bg right](media/futur-c-etait-mieux-avant.jpg)
 
@@ -265,7 +265,7 @@ def transfer_money(amount: float, account):
 
 ### Optimisation du runtime python
 
-Différentes optimisations durant les phases de compilation :
+- Différentes optimisations durant le build du runtime
 
 ![center](./media/optimizations.drawio.svg)
 
@@ -304,7 +304,7 @@ Optimisation cache
 
 ---
 
-<!-- 
+<!--
 ### Comparaison de Dockerfiles officiels
 
 - https://hub.docker.com/_/python/
@@ -338,7 +338,7 @@ Il est donc **crucial** d’avoir la **même architecture CPU** entre le `build`
 Sinon ➜ crash, `illegal instruction`.
 
 
-<!-- 
+<!--
 - Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**. -->
 
 ---

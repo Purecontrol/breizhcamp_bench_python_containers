@@ -38,72 +38,43 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ### Luc Sorel-Giffo
 
-* **Tech lead** chez **See you sun**.
-* **Expert Python** pendant un et demi chez **Purecontrol**.
-* **Consultant formateur Python** pendant 6 ans chez **Zenika**. 
-* **Co-fondateur** communauté **Python-Rennes**.
-* **génération de documentation** à partir du code source, soit par **analyse statique** (py2puml), soit par **traçage d’exécution** (pydoctrace).
+- **Tech lead** chez **See you sun**.
+- **Expert Python** pendant un et demi chez **Purecontrol**.
+- **Consultant formateur Python** pendant 6 ans chez **Zenika**. 
+- **Co-fondateur** communauté **Python-Rennes**.
+- **génération de documentation** à partir du code source, soit par **analyse statique** (py2puml), soit par **traçage d’exécution** (pydoctrace).
 
 ---
 
 ### Sébastien Baguet
 
-* **Infra lead** chez **Purecontrol**.
-* spécialisé dans **l’infrastructure open source**, **l’automatisation** et la **scalabilité** des systèmes.
-* Ancien responsable infrastructure chez **ARIADNEXT by IDNow**.
-* **Direction des projets R&D** en Big Data et en machine learning.
-* Expertises en **bas niveau** (embarqué, électronique, réparation), aux applicatifs **Linux**, en passant par le **kernel**. 
-* Intérêt pour **l’impact environnemental** des technologies.
+- **Infra lead** chez **Purecontrol**.
+- spécialisé dans **l’infrastructure open source**, **l’automatisation** et la **scalabilité** des systèmes.
+- Ancien responsable infrastructure chez **ARIADNEXT by IDNow**.
+- **Direction des projets R&D** en Big Data et en machine learning.
+- Expertises en **bas niveau** (embarqué, électronique, réparation), aux applicatifs **Linux**, en passant par le **kernel**. 
+- Intérêt pour **l’impact environnemental** des technologies.
 
 ---
 
 ### Gaston Gary 
 
-* développeur Python depuis 3 ans chez **Purecontrol**
-* Responsable de la récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
-* interconnexions à des APIs
-* Responsable d'un service de calcul de timeseries prénommé ...
+- développeur Python depuis 3 ans chez **Purecontrol**
+- Responsable de la récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
+- interconnexions à des APIs
+- Responsable d'un service de calcul de timeseries prénommé ...
+
+#TODO schema marketing et quick presentation metier purecontrol
 
 ---
 
-## local-processing
+## Applicatif métier local-processing
 
-* Traitement et agrégation de **séries temporelles**
-* En continu
-* Plus de **50 000 calculs par minute**
-* Données en sortie utilisées pour différent cas d'usage: Pilotage, alerting, dashboarding.
-* Objectif : **0 latence**
-
----
-
-### Quand je suis arrivé...
-
-- utilisation du python systeme.
-- Pas de **virtualenv**
-- Aucun test
-- Un unique gros fichier Python
-- Un seul serveur pour prod **et** dev
-- Git utilisé comme **sauvegarde** du serveur.
-
-![bg right](https://s2.qwant.com/thumbr/474x303/7/7/c159a4416cf1b30fea194a49da801d59f966c0e2d414580ef384f01760efe7/th.jpg?u=https%3A%2F%2Ftse.mm.bing.net%2Fth%3Fid%3DOIP.ZIaKioLPt65-c3ntAHQewgHaEv%26pid%3DApi&q=0&b=1&p=0&a=0)
-
----
-
-### à mettre en place
-
-Professionnaliser par **itérations**.
-  
-On est passé d’un script artisanal à une **application solide** :
-
-- **factorisation** quand c'est possible
-- **conteneurisation** de l'application via **docker** 
-- mise en place des **tests unitaires**
-- création un workflow **d'intégration et développement continu**
-
----
-
-<!-- _class: lead -->
-### Schema architecture et présentation
+- Traitement et agrégation de **séries temporelles**
+- En temps réel
+- Plus de **50 000 tâches par minute**
+- Génération de données synthétiques utilisées en entrées par d'autres briques métiers. 
+- Objectif : **pas de retard**
 
 ---
 
@@ -115,7 +86,7 @@ On est passé d’un script artisanal à une **application solide** :
 
 - **MainService**
   - **Thread**: soumission des tâches à ProcessPoolexecutor 
-  - **boucle infini**
+  - **boucle infinie**
     - monitoring
     - update tasks output status
 
@@ -126,6 +97,15 @@ On est passé d’un script artisanal à une **application solide** :
   - **écriture** de la série temporelle en output
 
 On peut voir qu'il y a beaucoup de parallélisme, beaucoup d'io réseau.
+
+---
+
+### déploiement old school
+
+- utilisation du python systeme.
+- Pas de **virtualenv**.
+- Déployé sur une VM a la main.
+![bg right](https://s2.qwant.com/thumbr/474x303/7/7/c159a4416cf1b30fea194a49da801d59f966c0e2d414580ef384f01760efe7/th.jpg?u=https%3A%2F%2Ftse.mm.bing.net%2Fth%3Fid%3DOIP.ZIaKioLPt65-c3ntAHQewgHaEv%26pid%3DApi&q=0&b=1&p=0&a=0)
 
 ---
 
@@ -180,7 +160,7 @@ Est-ce l'effet de :
 
 ---
 
-### Optimisation de l'execution luc
+### Optimisation de l'execution
 
 `python -O mon_script.py` (docstrings supprimées, asserts ignorés, à compléter)
 - just in time compilation JIT
@@ -228,16 +208,12 @@ Flags
 https://docs.python.org/3/using/configure.html#performance-options
 
  -->
----
-### CFLAGS
 
-#TODO details des flags de compile
-
-détails des flags dans les images
+#TODO slide recap option compile de chaque image GG
 
 ---
-
-### Comparaison de Dockerfiles officiels LUC
+<!-- 
+### Comparaison de Dockerfiles officiels
 
 - https://hub.docker.com/_/python/
   - https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.11/slim-bookworm/Dockerfile#L72-L95
@@ -250,7 +226,7 @@ voir :
 - https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#special-environment-variables : CONFIGURE_OPTS
 - https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#building-for-maximum-performance : --enable-optimizations
 
----
+--- -->
 
 ### Attention aux options de compilation
 
@@ -261,59 +237,33 @@ Il y a  tout de même quelques point important à garder en tête ...
 
 ###  ils introduisent des **dépendances invisibles** à l’architecture CPU
 
+par exemple pour -march=native
 - On **compile** l’interpréteur Python **spécifiquement** pour l’architecture du **CPU**.
 - Résultat : l’image **ne fonctionne plus** si on la lance sur une autre architecture (ex: `build` sur AMD → `run` sur INTEL)
 
-- Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**.
-
----
-
-###  Build ≠ Run
-
-Il est donc **crucial** d’avoir la **même architecture CPU** entre :
-
-- La machine qui **build** l’image Docker
-- Et la machine qui **exécute** l’image
+Il est donc **crucial** d’avoir la **même architecture CPU** entre le `build` et le `run`
 
 Sinon ➜ crash, `illegal instruction`.
 
----
 
-###  Build time
-
- Compiler l’interpréteur python **prend du temps** :
-
-- Plusieurs minutes
-- redondant d'un build à l'autre.
-
-chez nous, la compilation prend : 
-![](media/buildtime.png)
-
----
-
-### Bonne pratique
-
- **Construisez l’image une fois**, puis :
-
-- Stockez-la dans une **registry**
-- **Réutilisez-la** sur toutes les machines compatibles, et toutes les applications python compatible.
-
-Ne reconstruisez pas l’image inutilement à chaque run.
-
-![bg right](media/buildworkflow.drawio.svg)
+<!-- 
+- Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**. -->
 
 ---
 
 ## Benchmarking : par où commencer ? 
 
- **Comment enquêter sur les perfs d’un conteneur ?**
+**Comment enquêter sur les perfs d’un conteneur ?**
 
 ---
 
-## 1- Métriques bas niveau système
+## Outils
 
-Utilisation de `cadvisor`  
-Pour suivre en temps réel :
+- `cadvisor`
+- Métriques et logs niveau applicatif
+- Profilage du code
+
+<!-- Pour suivre en temps réel :
 
 - l'usage Mémoire
 - l'usage CPU
@@ -321,9 +271,6 @@ Pour suivre en temps réel :
 
 Idéal pour détecter une **saturation système un éventuel bottleneck**
 
----
-
-## 2- Métriques et logs niveau applicatif
 
 Exploiter les **logs et métriques** pour suivre :
 
@@ -332,10 +279,6 @@ Exploiter les **logs et métriques** pour suivre :
 - Les tâches en echecs.
 
 Permet d'avoir une vision fonctionnelle de la performance de notre application.
-
----
-
-## 3- Profilage du code
 
 Utiliser un profiler comme `kcachegrind` sur les résultats de Cprofile.
 
@@ -350,14 +293,34 @@ En comparant avant et après, cela pourrait permettre d'identifier un endroit ou
 ```python
 python -m cProfile -o prof.out my_app.py && pyprof2calltree -i prof.out -o callgrind.out && kcachegrind callgrind.out
 ```
+ -->
 ---
 
+### présentation du bench et des différentes images LUC todo reformuler
 
-### présentation du bench et des différentes images LUC
+On a compilé et mesuré le temps de création des conteneurs.
+
+une stack docker compose avec:
+- cadvisor
+- prometheus
+- grafana
 
 ---
 
-### résultats LUC
+Maquette de notre applicatif python:
+- Cpu heavy
+- IO
+- en continue sur 30 minutes. 
+
+<!-- Cadvisor génère des métriques sur les conteneurs, prometheus les scraps et les stocks, grafana nous permets de les visualiser.  -->
+---
+
+#TODO GASTON tableau récap des flags de compile de chaque Dockerfile
+
+---
+
+### résultats #LUC
+
 
 - nombre de calculs faits chaque minute
 - durée moyenne d'un calcul
@@ -382,10 +345,23 @@ python3 -m sysconfig | grep CONFIG_ARGS
 
 ---
 
+### Bonne pratique
+
+ **Construisez l’image une fois**, puis :
+
+- Stockez-la dans une **registry**
+- **Réutilisez-la** sur toutes les machines compatibles, et toutes les applications python compatible.
+
+Ne reconstruisez pas l’image inutilement à chaque run.
+
+![bg right](media/buildworkflow.drawio.svg)
+
+---
+
 ## Merci !
 
 Vos questions
 
 Vos retours via openfeedback :
 
-![bg right;width:850px](media/openfeedback_qrcode.svg)
+![width:400px](media/openfeedback_qrcode.svg)

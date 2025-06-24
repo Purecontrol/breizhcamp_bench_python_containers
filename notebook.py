@@ -23,9 +23,6 @@ def _(pprint_dict):
     from os import getenv
     from pathlib import Path
 
-    BENCHMARK_SOURCES_CONFIG_FILE = getenv("BENCHMARK_SOURCES_CONFIG_FILE")
-    print(f"Fichier de configuration de l'analyse : {BENCHMARK_SOURCES_CONFIG_FILE}")
-
     def check_file_exist(file_to_check: Path, description: str) -> Path:
         if file_to_check.exists():
             print(f"✅ Le fichier de {description} '{file_to_check}' existe bien.")
@@ -33,7 +30,12 @@ def _(pprint_dict):
             print(f"❌ Le fichier de {description} '{file_to_check}' n'existe pas ou est mal nommé.")
         return file_to_check
 
-    with open(BENCHMARK_SOURCES_CONFIG_FILE, encoding="utf-8") as config_file:
+    _BENCHMARK_SOURCES_CONFIG_FILE = check_file_exist(
+        Path(getenv("BENCHMARK_SOURCES_CONFIG_FILE")),
+        "configuration de l'analyse",
+    )
+
+    with open(_BENCHMARK_SOURCES_CONFIG_FILE, encoding="utf-8") as config_file:
         _analysis_config = load(config_file)
         pprint_dict(_analysis_config)
 
@@ -52,7 +54,7 @@ def _(pprint_dict):
             image_name: check_file_exist(_BENCHMARK_RESULTS_DIR / f"{image_dict['results_prefix']}_{image_name}.json", f"résultats pour l'image {image_name}")
             for image_name, image_dict in _analysis_config["images"].items()
         }
-   
+
     return (
         BUILD_TIMES_FILE,
         COLORS_BY_IMAGE,

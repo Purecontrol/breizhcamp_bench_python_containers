@@ -142,31 +142,34 @@ Ce fichier a le format suivant :
     "ram_usage": "2025-06-23_134155-Memory_Usage-data-as-joinbyfield.csv",
     "images": {
         "debian": {
-            // couleur utilisée pour les graphiques de cette image docker
-            "color": "#A80030",
-            // début du fichier, sans le nom de l'image ni l'extension ("2025-06-23T02-58-28" pour "2025-06-23T02-58-28_debian.json")
-            "results_prefix": ""
+          // couleur utilisée pour les graphiques de cette image docker
+          "color": "#A80030",
+          // début du fichier, sans le nom de l'image ni l'extension ("2025-06-23T02-58-28" pour "2025-06-23T02-58-28_debian.json")
+            "results_prefix": "2025-06-24T00-49-05"
         },
-        // etc. pour chaque image du benchmark
         "official": {
             "color": "#FFD43B",
-            "results_prefix": ""
+            "results_prefix": "2025-06-24T01-19-38"
         },
         "pyenvbasic": {
             "color": "#07B08C",
-            "results_prefix": ""
+            "results_prefix": "2025-06-24T01-50-11"
         },
-        "pyenvmiopt": {
-            "color": "#05765D",
-            "results_prefix": ""
+        "pyenvopt": {
+            "color": "#068F71",
+            "results_prefix": "2025-06-24T02-20-44"
         },
-        "pyenvfullopt": {
+        "pyenvoptmarch": {
+            "color": "#046D57",
+            "results_prefix": "2025-06-24T02-51-18"
+        },
+        "pyenvoptmarchbolt": {
             "color": "#034C3C",
-            "results_prefix": ""
+            "results_prefix": "2025-06-24T03-21-51"
         },
         "uv": {
             "color": "#AB47BC",
-            "results_prefix": ""
+            "results_prefix": "2025-06-24T03-52-24"
         }
     }
 }

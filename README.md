@@ -93,6 +93,8 @@ bash 1_images_build_time.sh
 # -> résultats dans le dossier 1_build_times/ (non versionné)
 ```
 
+Note : la version de python installée dans les images est 3.12.11, sauf debian bookworm qui embarque la 3.11.2
+
 ### Performances des images applicatives
 
 ```sh

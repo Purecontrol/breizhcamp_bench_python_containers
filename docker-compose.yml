@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.debian
+      # args:
+      #   PYTHON_VERSION: "3.11.2" # la version embarquée par bookworm est 3.11.2
     volumes:
       - ./config.json:/config.json
       - ./2_benchmark_results:/results

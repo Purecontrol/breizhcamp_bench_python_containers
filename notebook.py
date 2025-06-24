@@ -6,20 +6,18 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    from json import dumps
+    from json import dumps, load
 
-    import marimo as mo
     import plotly.graph_objects as go
     import polars as pl
 
     def pprint_dict(obj: dict):
         print(dumps(obj, indent=2))
-    return go, pl, pprint_dict
+    return go, load, pl, pprint_dict
 
 
 @app.cell
-def _(pprint_dict):
-    from json import load
+def _(load, pprint_dict):
     from os import getenv
     from pathlib import Path
 
@@ -37,7 +35,6 @@ def _(pprint_dict):
 
     with open(_BENCHMARK_SOURCES_CONFIG_FILE, encoding="utf-8") as config_file:
         _analysis_config = load(config_file)
-        pprint_dict(_analysis_config)
 
         _BUILD_RESULTS_DIR = Path(_analysis_config["build_results_dir"])
         BUILD_TIMES_FILE = check_file_exist(_BUILD_RESULTS_DIR / _analysis_config["build_times"], "temps de construction des images")
@@ -54,6 +51,7 @@ def _(pprint_dict):
             image_name: check_file_exist(_BENCHMARK_RESULTS_DIR / f"{image_dict['results_prefix']}_{image_name}.json", f"résultats pour l'image {image_name}")
             for image_name, image_dict in _analysis_config["images"].items()
         }
+        pprint_dict(_analysis_config)
 
     return (
         BUILD_TIMES_FILE,
@@ -62,11 +60,12 @@ def _(pprint_dict):
         IMAGE_NAMES,
         Path,
         RAM_USAGE_FILE,
+        RESULTS_BY_IMAGE,
     )
 
 
 @app.cell
-def _(BUILD_TIMES_FILE, COLORS_BY_IMAGE: dict[str, str], Path):
+def _(BUILD_TIMES_FILE, COLORS_BY_IMAGE: dict[str, str], Path, pprint_dict):
     from re import compile as re_compile, Pattern
 
     # récupération du temps de compilation et de la taille de chaque image
@@ -112,7 +111,7 @@ def _(BUILD_TIMES_FILE, COLORS_BY_IMAGE: dict[str, str], Path):
         return stats_by_image
 
     stats_by_image = scrap_images_build_time_and_size(BUILD_TIMES_FILE, COLORS_BY_IMAGE)
-    # pprint_dict(stats_by_image)
+    pprint_dict(stats_by_image)
     return (stats_by_image,)
 
 
@@ -123,9 +122,10 @@ def _(
     IMAGE_NAMES,
     Path,
     RAM_USAGE_FILE,
+    RESULTS_BY_IMAGE: "dict[str, Path]",
     go,
+    load,
     pl,
-    pprint_dict,
     stats_by_image,
 ):
     # affichage des consommations CPU et RAM
@@ -133,15 +133,24 @@ def _(
     from polars import DataFrame, read_csv, from_epoch
     from polars.datatypes.classes import Float64, Int64
 
-    benchmark_image_columns = [f"bench_{image_name}" for image_name in IMAGE_NAMES]
+    benchmark_image_columns = {
+        "Time": "Time",
+        "bench_pyenvbasic": "pyenvbasic",
+        "bench_pyenvoptmarch": "pyenvoptmarch",
+        "bench_official": "official",
+        "bench_debian": "debian",
+        "bench_pyenvoptmarchbolt": "pyenvoptmarchbolt",
+        "bench_pyenvopt": "pyenvopt",
+        "bench_uv": "uv",
+    }
 
     def load_dataframe(data_file: Path, values_datatype) -> DataFrame:
         # https://docs.pola.rs/api/python/stable/reference/api/polars.read_csv.html
         return read_csv(
             data_file,
             # sélection et renommage des colonnes
-            columns=["Time", *benchmark_image_columns],
-            new_columns=["Time", *IMAGE_NAMES],
+            columns=list(benchmark_image_columns.keys()),
+            new_columns=list(benchmark_image_columns.values()),
             null_values="undefined",
             infer_schema=False,
             schema_overrides={"Time": Int64} | {
@@ -173,7 +182,7 @@ def _(
         narrowed_df = values_df.select(values_df.columns).with_columns(
             **{
                 image_column: pl.when(
-                    pl.col(image_column).diff(n=1).abs() > 0.2
+                    pl.col(image_column).diff(n=1).abs() > 0.4
                 ).then(None).otherwise(pl.col(image_column))
                 for image_column in values_df.columns
                 if image_column != "Time"
@@ -187,8 +196,6 @@ def _(
 
     narrowed_cpu_df, cpu_mean_by_image = narrow_cpu_df(cpu_df, IMAGE_NAMES)
     # pprint_dict(cpu_mean_by_image)
-    plot_timeseries(cpu_df, COLORS_BY_IMAGE, "Évolution des consommations CPU des différentes images")
-    plot_timeseries(narrowed_cpu_df, COLORS_BY_IMAGE, "Évolution des CPU des différentes images sans les rampes")
 
     def narrow_ram_df(values_df: DataFrame, nullifier_df: DataFrame) -> DataFrame:
         return pl.concat(
@@ -210,9 +217,6 @@ def _(
 
     narrowed_ram_df = narrow_ram_df(ram_df, narrowed_cpu_df)
 
-    plot_timeseries(ram_df, COLORS_BY_IMAGE, "Évolution des consommations RAM des différentes images")
-    plot_timeseries(narrowed_ram_df, COLORS_BY_IMAGE, "Évolution des RAM des différentes images sans les rampes")
-
     ram_mean_by_image = {
         image_name: ram_mean_values[0]
         for image_name, ram_mean_values in narrowed_ram_df.select(COLORS_BY_IMAGE.keys()).mean().to_dict(as_series=False).items()
@@ -229,8 +233,47 @@ def _(
             "value": ram_mean / (1024**2),
             "unit": "Mo"
         }
+    # chargement des performances métier
+    def load_business_perfs(result_files_by_image: dict[str, Path], image_stats: dict):
+        for image_name, result_path in result_files_by_image.items():
+            with open(result_path, encoding="utf-8") as result_file:
+                image_results = load(result_file)
+                tasks_nb = image_results["tasks"]
+                image_stats[image_name] |= {
+                    "tasks_per_min": {
+                        "value": image_results["tasks_per_min"],
+                        "unit": "t",
+                    },
+                    "cpu_per_task": {
+                        "value": image_stats[image_name]["cpu_mean"]["value"] / tasks_nb,
+                        "unit": "%",
+                    },
+                    "ram_per_task": {
+                        "value": image_stats[image_name]["ram_mean"]["value"] / tasks_nb,
+                        "unit": "%",
+                    },
+                }
 
-    pprint_dict(stats_by_image)
+    load_business_perfs(RESULTS_BY_IMAGE, stats_by_image)
+    # pprint_dict(stats_by_image)
+
+    return cpu_df, narrowed_cpu_df, narrowed_ram_df, plot_timeseries, ram_df
+
+
+@app.cell
+def _(
+    COLORS_BY_IMAGE: dict[str, str],
+    cpu_df,
+    narrowed_cpu_df,
+    narrowed_ram_df,
+    plot_timeseries,
+    ram_df,
+):
+    plot_timeseries(cpu_df, COLORS_BY_IMAGE, "Évolution des consommations CPU des différentes images")
+    plot_timeseries(narrowed_cpu_df, COLORS_BY_IMAGE, "Évolution des CPU des différentes images sans les rampes")
+
+    plot_timeseries(ram_df, COLORS_BY_IMAGE, "Évolution des consommations RAM des différentes images")
+    plot_timeseries(narrowed_ram_df, COLORS_BY_IMAGE, "Évolution des RAM des différentes images sans les rampes")
 
     return
 
@@ -242,6 +285,9 @@ def _(go, stats_by_image):
         "build_size": "taille de l'image",
         "cpu_mean": "CPU moyen",
         "ram_mean": "RAM moyenne",
+        "tasks_per_min": "tâches / minute",
+        "cpu_per_task" : "CPU / tâche",
+        "ram_per_task": "RAM / tâche",
     }
 
     def draw_radar_plot(categories: dict, stats_by_image: dict):

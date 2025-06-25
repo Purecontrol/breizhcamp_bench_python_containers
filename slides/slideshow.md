@@ -53,11 +53,16 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 ### Gaston Gary 
 
 - développeur Python depuis 3 ans chez **Purecontrol**
-- Responsable de la récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
+- Responsable récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
 - interconnexions à des APIs
-- Responsable d'un service de calcul de timeseries prénommé ...
+- Maintenance d'un des services de calcul
 
-#TODO schema marketing et quick presentation metier purecontrol
+---
+### Purecontrol
+
+![width:1000px](media/fonctionnement_Purecontrol_schéma_FR.png)
+
+<!-- Purecontrol est une société Rennaise, qui propose une solution de contrôle-commande basée sur l’intelligence artificielle ; On pilote en temps réel les procédés industriels liés à l’eau et à l’énergie pour réduire simultanément la consommation, les coûts d’exploitation et les émissions de CO₂. -->
 
 ---
 
@@ -73,11 +78,9 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ---
 
-![bg right;width:850px](media/archi.drawio.svg)
+![](media/archi.drawio.svg)
 
 ---
-
-### key points architecture
 
 - **MainService**
   - **Thread**: soumission des tâches à ProcessPoolexecutor 
@@ -90,9 +93,8 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
   - **récupération** des données temporelles en entrée
   - **transformation**
   - **écriture** de la série temporelle en output
-
--> parallélisme +++, IO réseau ++, CPU + (traitement des données)
-
+<!-- 
+-> parallélisme +++, IO réseau ++, CPU + (traitement des données) -->
 ---
 
 ### Déploiement old school
@@ -229,7 +231,6 @@ Voir [whatsnew313-jit-compiler](https://docs.python.org/3/whatsnew/3.13.html#wha
 
 ![center](./media/optimizations.drawio.svg)
 
-
 - Pour visualiser les options du runtime
   - `python3 -m sysconfig | grep CONFIG_ARGS`
 
@@ -265,9 +266,8 @@ https://docs.python.org/3/using/configure.html#performance-options
 
  -->
 
-#TODO slide recap option compile de chaque image GG
-
 ---
+
 <!-- 
 ### Comparaison de Dockerfiles officiels
 
@@ -325,7 +325,7 @@ Sinon ➜ crash, `illegal instruction`.
 - l'usage CPU
 - l'usage I/O disque & réseau
 
-Idéal pour détecter une **saturation système un éventuel bottleneck**
+Idéal pour détecter une **saturation système**
 
 
 Exploiter les **logs et métriques** pour suivre :
@@ -371,7 +371,20 @@ Maquette de notre applicatif python:
 <!-- Cadvisor génère des métriques sur les conteneurs, prometheus les scraps et les stocks, grafana nous permets de les visualiser.  -->
 ---
 
-#TODO GASTON tableau récap des flags de compile de chaque Dockerfile
+### Comparatif de nos images
+
+<!-- style: table{font-size:.55em} -->
+
+
+| Image            | `--enable-optimizations` | `--with-lto` | `--enable-bolt` | `-march = native` | `-mtune = native` | **Compilateur** |
+|------------------------|:---------------------------------:|:------------:|:---------------:|:-------------------:|:-------------------:|:---------------:|
+| **debian**             | ✘ | ✘ | ✘ | ✘ | ✘ | **GCC** |
+| **official (slim)**    | ✔︎ | ✔︎ | ✘ | ✘ | ✘ | **GCC** |
+| **pyenvbasic**         | ✘ | ✘ | ✘ | ✘ | ✘ | **GCC** |
+| **pyenvopt**           | ✔︎ | ✔︎ | ✘ | ✘ | ✘ | **GCC** |
+| **pyenvoptmarch**      | ✔︎ | ✔︎ | ✘ | ✔︎ | ✔︎ | **GCC** |
+| **pyenvoptmarchbolt**  | ✔︎ | ✔︎ | ✔︎ | ✔︎ | ✔︎ | **GCC** |
+| **uv**  | ✔︎ | ✔︎ | ✔︎ | ✘ | ✘ | **Clang** |
 
 ---
 
@@ -398,19 +411,6 @@ python3 -m sysconfig | grep CONFIG_ARGS
 
 - pyenv installe depuis les sources, configuration du build avec des drapeaux ou des variables d'environnement
 - python-build-standalone (utilisé par uv) produit des binaires optimisés avec `--enable-optimizations` (https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L472), mais d'autres drapeaux d'optimisation spécifique (à l'architecture du CPU) ne sont pas utilisés
-
----
-
-### Bonne pratique
-
- **Construisez l’image une fois**, puis :
-
-- Stockez-la dans une **registry**
-- **Réutilisez-la** sur toutes les machines compatibles, et toutes les applications python compatible.
-
-Ne reconstruisez pas l’image inutilement à chaque run.
-
-![bg right](media/buildworkflow.drawio.svg)
 
 ---
 

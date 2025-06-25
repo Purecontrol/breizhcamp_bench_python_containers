@@ -16,7 +16,7 @@ Le trio :
 
 ```sh
 # lancement d'un serveur web permettant de visualiser la présentation dans un navigateur, qui s'auto-rafraichit
-docker run --rm --init -v $PWD:/home/marp/app -e LANG=$LANG -p 8080:8080 -p 37717:37717 marpteam/marp-cli -s .
+docker run --rm --init -v $PWD:/home/marp/app -e LANG=$LANG -p 8080:8080 -p 37717:37717 marpteam/marp-cli -s --html .
 # -> aller à http://localhost:8080/slides/slideshow.md
 
 # génération et mise à jour en temps réel du fichier html

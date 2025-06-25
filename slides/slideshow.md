@@ -18,6 +18,32 @@ style: |
     font-size: 100px
   }
 ---
+
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+  // https://connaissances.fournier38.fr/entry/Utiliser%20les%20graphs%20Mermaid%20dans%20le%20Markdown
+  // Replaces <pre class="mermaid"> blocks with <img> blocks, to make mermaid render properly.
+  // Preserves classes and styling so they can be used to fix sizing if necessary.
+
+  mermaid.initialize({ startOnLoad: false });
+
+  window.addEventListener('load', async function () {
+    const mermaidEls = document.querySelectorAll('pre.mermaid');
+
+    for (const el of mermaidEls) {
+      const { svg } = await mermaid.render('asd', el.textContent);
+
+      const img = document.createElement('img');
+      img.setAttribute('src', `data:image/svg+xml;base64,${btoa(svg)}`);
+      img.setAttribute('class', el.getAttribute('class'));
+      img.setAttribute('style', el.getAttribute('style') || '');
+
+      el.parentNode.replaceChild(img, el);
+    }
+  });
+</script>
+
 <!-- _class: lead -->
 # Conteneurisation de Python
 Chute de performances et investigations
@@ -192,6 +218,7 @@ execute_tasks(
   * ⚠️ au `global interpreter lock`
   * désactivable dans la 3.14
 * multiprocessing pour les opérations CPU
+* tenir compte des coûts de création des IO (connexions bdd, threads, process) : utiliser des pools
 
 ---
 
@@ -204,36 +231,34 @@ def transfer_money(amount: float, account):
   account.add(amount)
 ```
 
-`python -O mon_script.py` supprime :
+`python -O mon_script.py` supprime (voir la doc [cmdoption-O](https://docs.python.org/3/using/cmdline.html#cmdoption-O)) :
   - `-O` : les assertions, les blocs `if __debug__:`
   - `-OO` : les docstrings aussi
 
-Éviter d'exprimer les vérifications métier avec des `assert`
-- ignorées en mode optimize (voir la doc [cmdoption-O](https://docs.python.org/3/using/cmdline.html#cmdoption-O))
-- try-except : tout devient `AssertionError`
+-> éviter d'exprimer les vérifications métier avec des `assert`
 
 ---
 
 ### Optimisation de l'exécution - 2
 
-🧪 Just-in-time compiler (3.13+) :
+🧪 Just-in-time compiler (voir [whatsnew313-jit-compiler](https://docs.python.org/3/whatsnew/3.13.html#whatsnew313-jit-compiler)) :
 - modification du bytecode au fil de l'exécution du programme
 * additionner des entiers `!=` additionner des décimaux
 * 🔎 l'interpréteur doit avoir été compilé avec cette option d'exécution
-
-Voir [whatsnew313-jit-compiler](https://docs.python.org/3/whatsnew/3.13.html#whatsnew313-jit-compiler)
 
 ---
 
 ### Optimisation du runtime python
 
-- Différentes optimisations durant les phases de compilations
+Différentes optimisations durant les phases de compilations :
 
 ![center](./media/optimizations.drawio.svg)
 
-- Pour visualiser les options du runtime
-  - `python3 -m sysconfig | grep CONFIG_ARGS`
+Voir les options de compilation du runtime :
 
+```sh
+python3 -m sysconfig | grep CONFIG_ARGS
+```
 
 <!-- Seb
 Compiler level optimisation
@@ -307,17 +332,26 @@ Sinon ➜ crash, `illegal instruction`.
 
 ---
 
-## Benchmarking : par où commencer ? 
+## Benchmark des binaires python via des conteneurs
 
-**Comment enquêter sur les perfs d’un conteneur ?**
+- applicatif "test" (architecture et opérations similaires à l'application) tournant 30 minutes
+- temps de création & taille de chaque image Docker (7 images)
+- métriques "système" : consommations CPU & RAM
+- métriques métier :  nb de tâches réalisées
+- métriques hybrides : CPU / tâche, RAM / tâche
 
 ---
 
-## Outils
+### Collecte des métriques système
 
-- `cadvisor`
-- Métriques et logs niveau applicatif
-- Profilage du code
+<pre class="mermaid">
+  flowchart LR
+    bench -..->| mesures CPU et RAM | cAdvisor
+    subgraph monitoring
+      cAdvisor -..->| scrapping / 5s | prometheus
+      prometheus -..->| dashboard | grafana
+    end
+</pre>
 
 <!-- Pour suivre en temps réel :
 

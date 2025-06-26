@@ -9,7 +9,6 @@ import argparse
 from pathlib import Path
 import json
 from datetime import datetime
-import random
 
 def little_io_operation(taille_mo: int = 4) -> None:
     bloc = os.urandom(1*10**6) # 1 mo
@@ -20,10 +19,10 @@ def little_io_operation(taille_mo: int = 4) -> None:
         while fichier.read(1*10**6): # on lit par bloc de 1 mo
             pass
 
-def little_cpu_operation(iterations: int = 50_000) -> int:
+def little_cpu_operation(iterations: int = 50_000) -> None:
     total = 0
     for i in range(iterations):
-        total += i * random.randint(-i, i)
+        total += i * i
     return total
 
 def target_worker(

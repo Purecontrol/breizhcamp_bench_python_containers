@@ -288,7 +288,7 @@ Luc
 
 ### Optimisation du runtime python
 
-- Différentes optimisations durant le build du runtime
+Différentes optimisations durant le build du runtime (en C)
 
 ![center](./media/optimizations.drawio.svg)
 
@@ -473,7 +473,9 @@ Sébastien
 
 ## Merci !
 
+Diaporama et benchmark : [github.com/Purecontrol/breizhcamp_bench_python_containers](https://github.com/Purecontrol/breizhcamp_bench_python_containers)
+
 - vos questions
 - vos retours via openfeedback
 
-![width:300px](media/openfeedback_qrcode.svg)
+![width:250px](media/openfeedback_qrcode.svg)

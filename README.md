@@ -58,6 +58,17 @@ conteneurisations :
   - `--with-lto` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L509
   - pas de `PYTHON_CFLAGS="-march=native -mtune=native"`
 
+### Comparaison de Dockerfiles officiels
+
+- https://hub.docker.com/_/python/
+  - https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.11/slim-bookworm/Dockerfile#L72-L95
+
+
+pyenv, voir :
+- https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#special-environment-variables : CONFIGURE_OPTS
+- https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#building-for-maximum-performance : --enable-optimizations
+
+
 ## Monitoring du benchmark
 
 ### Temps de création des images Docker applicatives

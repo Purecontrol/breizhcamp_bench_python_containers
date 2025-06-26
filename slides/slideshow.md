@@ -42,31 +42,35 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ## Qui sommes-nous ?
 
-* Sébastien Baguet : infra lead et devOps [@Purecontrol](https://www.purecontrol.com/)
-* Gaston Gary : dev [@Purecontrol](https://www.purecontrol.com/)
 * Luc Sorel-Giffo : lead dev [@See you sun](https://seeyousun.fr/)
   - ex-Purecontrol 🫶
   - co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/) 🔔
   - [@lucsorelgiffo@floss.social](https://floss.social/@lucsorelgiffo)
+* Sébastien Baguet : infra lead et devOps [@Purecontrol](https://www.purecontrol.com/)
+* Gaston Gary : dev [@Purecontrol](https://www.purecontrol.com/)
 
 ---
 ### Purecontrol
 
 ![center](media/fonctionnement_Purecontrol_schéma_FR.png)
 
-<!-- Purecontrol est une société Rennaise, qui propose une solution de contrôle-commande basée sur l’intelligence artificielle ; On pilote en temps réel les procédés industriels liés à l’eau et à l’énergie pour réduire simultanément la consommation, les coûts d’exploitation et les émissions de CO₂. -->
+<!-- 
+Gaston
+
+Purecontrol est une société Rennaise, qui propose une solution de contrôle-commande basée sur l’intelligence artificielle ; On pilote en temps réel les procédés industriels liés à l’eau et à l’énergie pour réduire simultanément la consommation, les coûts d’exploitation et les émissions de CO₂.
+-->
 
 ---
 
 ## Applicatif métier local-processing
-
-(titre alternatif : Une antiquité bien dynamique)
 
 - traitement et agrégation de **séries temporelles**
 - données synthétiques utilisées par d'autres briques métier
 - **50 000+ tâches par minute**
 - en temps réel
 - impératif : **ne pas accumuler de retard**
+
+<!-- Gaston -->
 
 ---
 ## Applicatif métier local-processing
@@ -78,9 +82,11 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 - chaque sous process collecte les données temporelles (requêtes InfluxDB), fait les calculs et enregistre les agrégations (InfluxDB)
 - enregistrement du statut des calculs (MariaDB)
 
-
 <!--
--> parallélisme +++, IO réseau ++, CPU + (traitement des données) -->
+Gaston
+
+-> parallélisme +++, IO réseau ++, CPU + (traitement des données)
+-->
 ---
 
 ### Déploiement old school
@@ -92,6 +98,9 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ![bg right height:750px](media/vm-museum.jpg)
 
+<!--
+Gaston
+-->
 ---
 
 ### Conteneurisation Docker
@@ -112,6 +121,10 @@ Avantages classiques d'une image :
 
 On en profite pour passer de 3.8 à 3.12 😁
 
+<!--
+Gaston ou Sébastien
+-->
+
 ---
 
 ### Oui mais... perte de performance de 30% !
@@ -122,6 +135,10 @@ On en profite pour passer de 3.8 à 3.12 😁
 - accumulation rapide de **retard**
 - optimisation dégradée des pilotages
 
+<!--
+Gaston ou Sébastien
+-->
+
 ---
 
 ### 🤔 Est-ce l'effet de :
@@ -130,15 +147,23 @@ On en profite pour passer de 3.8 à 3.12 😁
 * la dockerisation (comportement des binaires) ?
 * la montée de version de Python ?
 
+<!--
+Gaston ou Sébastien
+
+"Quels sont les points d'optimisation d'un service numérique (Python) ?"
+-->
+
 ---
 
 ## Quels sont les points d'optimisation d'un service numérique (Python) ?
 
-(Luc : j'enlèverais bien les 3 puces pour laisser la salle répondre - on peut avoir des bonnes surprises - et garder le suspense sur l'optimisation du runtime)
-
 - algorithmie
 - architecture
 - optimisation du runtime
+
+<!--
+Luc
+-->
 
 ---
 
@@ -151,7 +176,10 @@ On en profite pour passer de 3.8 à 3.12 😁
 
 Dans notre cas, la perte de performance était diluée dans tout le code 😕
 
-<!-- Utiliser un profiler comme `kcachegrind` sur les résultats de Cprofile.
+<!--
+Luc
+
+Utiliser un profiler comme `kcachegrind` sur les résultats de Cprofile.
 
 Pour visualiser :
 
@@ -163,7 +191,8 @@ En comparant avant et après, cela pourrait permettre d'identifier un endroit ou
 
 ```python
 python -m cProfile -o prof.out my_app.py && pyprof2calltree -i prof.out -o callgrind.out && kcachegrind callgrind.out
-``` -->
+```
+-->
 
 ---
 
@@ -190,6 +219,10 @@ execute_tasks(
 ) # générateur streamant les tâches
 ```
 
+<!--
+Luc
+-->
+
 ---
 
 ### Algorithmie - 2
@@ -198,6 +231,10 @@ execute_tasks(
 * facilite l'encapsulation de binaires pour les traitements CPU ⚡
   - numpy, pandas, polars
   - Tensorflow, pytorch, jax
+
+<!--
+Luc
+-->
 
 ---
 
@@ -208,6 +245,10 @@ execute_tasks(
   * désactivable dans la 3.14
 * multiprocessing pour les opérations CPU
 * tenir compte des coûts de création des IO (connexions bdd, threads, process) : utiliser des pools
+
+<!--
+Luc
+-->
 
 ---
 
@@ -224,7 +265,11 @@ def transfer_money(amount: float, account):
   - `-O` : les assertions, les blocs `if __debug__:`
   - `-OO` : les docstrings aussi
 
-<!-- -> éviter d'exprimer les vérifications métier avec des `assert` -->
+<!-- 
+Luc
+
+-> éviter d'exprimer les vérifications métier avec des `assert`
+-->
 
 ---
 
@@ -234,6 +279,10 @@ def transfer_money(amount: float, account):
 - modification du bytecode au fil de l'exécution du programme
 * additionner des entiers `!=` additionner des décimaux
 * 🔎 l'interpréteur doit avoir été compilé avec cette option d'exécution
+
+<!--
+Luc
+-->
 
 ---
 
@@ -251,7 +300,9 @@ python3 -m sysconfig | grep CONFIG_ARGS
 
 (voir [docs.python.org/3/using/configure.html](https://docs.python.org/3/using/configure.html#performance-options))
 
-<!-- Seb
+<!--
+Seb
+
 Compiler level optimisation
 
 -O3 -> va optimiser fichier par fichier
@@ -278,32 +329,19 @@ Optimisation cache
 
 ---
 
-<!--
-### Comparaison de Dockerfiles officiels
-
-- https://hub.docker.com/_/python/
-  - https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.11/slim-bookworm/Dockerfile#L72-L95
-
----
-
-### Installation personnalisée avec pyenv LUC
-
-voir :
-- https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#special-environment-variables : CONFIGURE_OPTS
-- https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#building-for-maximum-performance : --enable-optimizations
-
---- -->
-
 ### Attention aux options de compilation
 
 Si les flags de compilation énoncés plus haut peuvent sembler optimaux,
-Il y a  tout de même quelques point important à garder en tête...
+Il y a tout de même quelques point important à garder en tête...
 
-* Le flag `-march` indique au compilateur d'utiliser des instructions CPU spécifiques
-  * Exemple avec `-march=native` un build sur CPU AMD ne fonctionnera pas sur CPU Intel (`illegal instruction`)
+* le flag `-march` indique au compilateur d'utiliser des instructions CPU spécifiques
+  * exemple avec `-march=native` un build sur CPU AMD ne fonctionnera pas sur CPU Intel (`illegal instruction`)
 
 <!--
-- Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**. -->
+Gaston
+
+- Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**.
+-->
 
 ---
 
@@ -312,8 +350,12 @@ Il y a  tout de même quelques point important à garder en tête...
 - applicatif "test" (architecture et opérations similaires à l'application) tournant 30 minutes
 - temps de création & taille de chaque image Docker (7 images)
 - métriques "système" : consommations CPU & RAM
-- métriques métier :  nb de tâches réalisées
+- métriques métier : nb de tâches réalisées
 - métriques hybrides : CPU / tâche, RAM / tâche
+
+<!--
+Gaston
+-->
 
 ---
 
@@ -332,22 +374,25 @@ Il y a  tout de même quelques point important à garder en tête...
 - [prometheus](https://prometheus.io/) : collecte et persiste des métriques exposées par des endpoints (télémétrie)
 - [grafana](https://grafana.com/grafana/dashboards/) : agrégation et visualisation temps réel
 
+<!--
+Sébastien
+-->
+
 ---
 
 ### Runtimes python des images testées
 
 <!-- style: table{font-size:.55em} -->
 
-| Image                 | **Compilateur** | **CFLAGS**         | `--enable-optimizations`  | `--with-lto`  | `--enable-bolt`  | Librairie statique         |
-|-----------------------|:---------------:|:------------------:|:-------------------------:|:-------------:|:----------------:|:------------------:|
-| **debian**            | GCC             |                    | ❌                        | ❌            | ❌               | ✅                   |
-| python **official**   | GCC             |                    | ✅                        | ✅            | ❌               | ❌                   |
-| **pyenvbasic**        | GCC             |                    | ❌                        | ❌            | ❌               | ❌                   |
-| **pyenvopt**          | GCC             |                    | ✅                        | ✅            | ❌               | ❌                   |
-| **pyenvoptmarch**     | GCC             | `tune=native`    | ✅                        | ✅            | ❌               | ❌    |
-| **pyenvoptmarchbolt** | GCC             | `tune=native`    | ✅                        | ✅            | ✅               | ❌    |
-| **uv**                | Clang           |                    | ✅                        | ✅            | ✅               | ✅                   |
-
+| Image                 | **Compilateur** | **CFLAGS**    | `--enable-optimizations` | `--with-lto`  | `--enable-bolt` | Binaire statique |
+|-----------------------|:---------------:|:-------------:|:------------------------:|:-------------:|:---------------:|:----------------:|
+| **debian**            | GCC             |               | ❌                       | ❌            | ❌              | ✅               |
+| python **official**   | GCC             |               | ✅                       | ✅            | ❌              | ❌               |
+| **pyenvbasic**        | GCC             |               | ❌                       | ❌            | ❌              | ❌               |
+| **pyenvopt**          | GCC             |               | ✅                       | ✅            | ❌              | ❌               |
+| **pyenvoptmarch**     | GCC             | `tune=native` | ✅                       | ✅            | ❌              | ❌               |
+| **pyenvoptmarchbolt** | GCC             | `tune=native` | ✅                       | ✅            | ✅              | ❌               |
+| **uv**                | Clang           |               | ✅                       | ✅            | ✅              | ✅               |
 
 ```sh
 docker run --rm -it my-python-image:latest bash
@@ -357,18 +402,18 @@ $ python3 -m sysconfig | grep CONFIG_ARGS
 $ ldd <path-to-my-python> | grep libpython
 ```
 
-
 <!--
+Sébastien
 
 Sous le capot
 - pyenv recompile son runtime python
 - uv télécharge des binaires depuis le projet python-build-standalone récement récupéré par astral (https://astral.sh/blog/python-build-standalone)
   - Si on veux aller plus loin et profiter d'option de compilation spécifique pour des CPUs plus récent, il est possible de recompiler son python-build-standalone en précisant un set de flag plus récent (ex ./build-linux.py --options pgo+lto --target x86_64_v4-unknown-linux-gnu)
 
-
 Option --enable-shared de python pour activer la librarie partagé
 /!\ debian et ubuntu l'utilise mais ensuite statifie le runtime
 -->
+
 ---
 
 ### Tableau de résultats
@@ -388,11 +433,21 @@ Attention :
 - fait sur une architecture (i7-6600U CPU @ 2.60GHz, 4 coeurs)
 - relatifs à l'application de test
 
+<!--
+Luc
+
+TODO mettre en gras les métriques les meilleures
+-->
+
 ---
 
 ### Comparaison relative des résultats
 
 ![](media/radar_chart.png)
+
+<!--
+Luc
+-->
 
 ---
 
@@ -404,6 +459,15 @@ Attention :
 * stack de monitoring système : cAdvisor + prometheus + grafana
 * les options de compilation de l'interpréteur `python` ont un impact sur le CPU
 * 💙💛 [uv](https://github.com/astral-sh/uv) ([python-build-standalone](https://github.com/astral-sh/python-build-standalone)) : en local ou dans un conteneur
+
+<!--
+Ensemble
+
+Gaston
+Sébastien
+Luc uv
+Sébastien
+-->
 
 ---
 

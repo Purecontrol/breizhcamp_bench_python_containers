@@ -284,8 +284,8 @@ def _(go, stats_by_image):
     categories = {
         "build_duration": "temps de build",
         "build_size": "taille de l'image",
-        "cpu_mean": "CPU moyen",
-        "ram_mean": "RAM moyenne",
+        # "cpu_mean": "CPU moyen",
+        # "ram_mean": "RAM moyenne",
         "tasks_per_min": "tâches / minute",
         "cpu_per_task" : "CPU / tâche",
         "ram_per_task": "RAM / tâche",

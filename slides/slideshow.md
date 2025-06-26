@@ -69,22 +69,16 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 - impératif : **ne pas accumuler de retard**
 
 ---
+## Applicatif métier local-processing
 
 ![center](media/archi.drawio.svg)
 
----
+- thread de collecte des traitements (requête MariaDB)
+- pool de sous-process pour paralléliser les calculs
+- chaque sous process collecte les données temporelles (requêtes InfluxDB), fait les calculs et enregistre les agrégations (InfluxDB)
+- enregistrement du statut des calculs (MariaDB)
 
-- **MainService**
-  - **Thread**: soumission des tâches à ProcessPoolexecutor
-  - **boucle infinie**
-    - monitoring
-    - update tasks output status
 
-- **Worker**
-  - traitement **unitaire** d'une tache
-  - **récupération** des données temporelles en entrée
-  - **transformation**
-  - **écriture** de la série temporelle en output
 <!--
 -> parallélisme +++, IO réseau ++, CPU + (traitement des données) -->
 ---
@@ -96,7 +90,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 - installation des dépendances sans **.venv/**
 - redémarrage 🤞
 
-![bg right](media/vm-museum.png)
+![bg right height:750px](media/vm-museum.jpg)
 
 ---
 
@@ -303,20 +297,10 @@ voir :
 ### Attention aux options de compilation
 
 Si les flags de compilation énoncés plus haut peuvent sembler optimaux,
-Il y a  tout de même quelques point important à garder en tête ...
+Il y a  tout de même quelques point important à garder en tête...
 
----
-
-###  ils introduisent des **dépendances invisibles** à l’architecture CPU
-
-par exemple pour -march=native
-- On **compile** l’interpréteur Python **spécifiquement** pour l’architecture du **CPU**.
-- Résultat : l’image **ne fonctionne plus** si on la lance sur une autre architecture (ex: `build` sur AMD → `run` sur INTEL)
-
-Il est donc **crucial** d’avoir la **même architecture CPU** entre le `build` et le `run`
-
-Sinon ➜ crash, `illegal instruction`.
-
+* Le flag `-march` indique au compilateur d'utiliser des instructions CPU spécifiques
+  * Exemple avec `-march=native` un build sur CPU AMD ne fonctionnera pas sur CPU Intel (`illegal instruction`)
 
 <!--
 - Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**. -->
@@ -339,7 +323,7 @@ Sinon ➜ crash, `illegal instruction`.
   flowchart LR
     benchmark -..->| 🔎 CPU, RAM | cAdvisor
     subgraph monitoring
-      cAdvisor -..->| 💾 / 5s | prometheus
+      cAdvisor <-..- | 💾 / 5s | prometheus
       prometheus -..->| 📊 🗠 | grafana
     end
 </div>

@@ -72,7 +72,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 ---
 ### Purecontrol
 
-![width:1000px](media/fonctionnement_Purecontrol_schéma_FR.png)
+![center](media/fonctionnement_Purecontrol_schéma_FR.png)
 
 <!-- Purecontrol est une société Rennaise, qui propose une solution de contrôle-commande basée sur l’intelligence artificielle ; On pilote en temps réel les procédés industriels liés à l’eau et à l’énergie pour réduire simultanément la consommation, les coûts d’exploitation et les émissions de CO₂. -->
 
@@ -374,21 +374,37 @@ Sinon ➜ crash, `illegal instruction`.
 
 <!-- style: table{font-size:.55em} -->
 
-| Image | `--enable-optimizations` | `--with-lto`  | `-march = native` | `-mtune = native`| `--enable-bolt` | **Compilateur** |
-|--|:--:|:--:|:--:|:--:|:--:|:--:|
-| **debian**             | ❌ | ❌ | ❌ | ❌ | ❌ | GCC |
-| python **official**    | ✅ | ✅ | ❌ | ❌ | ❌ | GCC |
-| **pyenvbasic**         | ❌ | ❌ | ❌ | ❌ | ❌ | GCC |
-| **pyenvopt**           | ✅ | ✅ | ❌ | ❌ | ❌ | GCC |
-| **pyenvoptmarch**      | ✅ | ✅ | ✅ | ✅ | ❌ | GCC |
-| **pyenvoptmarchbolt**  | ✅ | ✅ | ✅ | ✅ | ✅ | GCC |
-| **uv**                 | ✅ | ✅ | ❌ | ❌ | ✅ | **Clang** |
+| Image                 | **Compilateur** | **CFLAGS**         | `--enable-optimizations`  | `--with-lto`  | `--enable-bolt`  | Librairie statique         |
+|-----------------------|:---------------:|:------------------:|:-------------------------:|:-------------:|:----------------:|:------------------:|
+| **debian**            | GCC             |                    | ❌                        | ❌            | ❌               | ✅                   |
+| python **official**   | GCC             |                    | ✅                        | ✅            | ❌               | ❌                   |
+| **pyenvbasic**        | GCC             |                    | ❌                        | ❌            | ❌               | ❌                   |
+| **pyenvopt**          | GCC             |                    | ✅                        | ✅            | ❌               | ❌                   |
+| **pyenvoptmarch**     | GCC             | `tune=native`    | ✅                        | ✅            | ❌               | ❌    |
+| **pyenvoptmarchbolt** | GCC             | `tune=native`    | ✅                        | ✅            | ✅               | ❌    |
+| **uv**                | Clang           |                    | ✅                        | ✅            | ✅               | ✅                   |
+
 
 ```sh
 docker run --rm -it my-python-image:latest bash
-$ python3 -m sysconfig | grep PYTHON_CFLAGS
+# Options de compilation python
+$ python3 -m sysconfig | grep CONFIG_ARGS
+# Python est compilé de manière statique si la commande suivante ne retourne rien
+$ ldd <path-to-my-python> | grep libpython
 ```
 
+
+<!--
+
+Sous le capot
+- pyenv recompile son runtime python
+- uv télécharge des binaires depuis le projet python-build-standalone récement récupéré par astral (https://astral.sh/blog/python-build-standalone)
+  - Si on veux aller plus loin et profiter d'option de compilation spécifique pour des CPUs plus récent, il est possible de recompiler son python-build-standalone en précisant un set de flag plus récent (ex ./build-linux.py --options pgo+lto --target x86_64_v4-unknown-linux-gnu)
+
+
+Option --enable-shared de python pour activer la librarie partagé
+/!\ debian et ubuntu l'utilise mais ensuite statifie le runtime
+-->
 ---
 
 ### Tableau de résultats

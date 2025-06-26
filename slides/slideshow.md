@@ -42,23 +42,12 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ## Qui sommes-nous ?
 
-* Sébastien Baguet : devOps [Purecontrol](https://www.purecontrol.com/)
-* Gaston Gary : dev [Purecontrol](https://www.purecontrol.com/)
-* Luc Sorel-Giffo : lead dev [See you sun](https://seeyousun.fr/)
+* Sébastien Baguet : infra lead et devOps [@Purecontrol](https://www.purecontrol.com/)
+* Gaston Gary : dev [@Purecontrol](https://www.purecontrol.com/)
+* Luc Sorel-Giffo : lead dev [@See you sun](https://seeyousun.fr/)
   - ex-Purecontrol 🫶
   - co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/) 🔔
   - [@lucsorelgiffo@floss.social](https://floss.social/@lucsorelgiffo)
-
----
-
-### Sébastien Baguet
-
-- **Infra lead** chez **Purecontrol**.
-- spécialisé dans **l’infrastructure open source**, **l’automatisation** et la **scalabilité** des systèmes.
-- Ancien responsable infrastructure chez **ARIADNEXT by IDNow**.
-- **Direction des projets R&D** en Big Data et en machine learning.
-- Expertises en **bas niveau** (embarqué, électronique, réparation), aux applicatifs **Linux**, en passant par le **kernel**.
-- Intérêt pour **l’impact environnemental** des technologies.
 
 ---
 
@@ -90,7 +79,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ---
 
-![](media/archi.drawio.svg)
+![center](media/archi.drawio.svg)
 
 ---
 

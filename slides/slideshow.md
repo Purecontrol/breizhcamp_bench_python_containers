@@ -50,15 +50,6 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
   - [@lucsorelgiffo@floss.social](https://floss.social/@lucsorelgiffo)
 
 ---
-
-### Gaston Gary
-
-- développeur Python depuis 3 ans chez **Purecontrol**
-- Responsable récupération de **données externes** en tout genre: *Méteo, puissances actives, relevés manuels d'exploitants ...*
-- interconnexions à des APIs
-- Maintenance d'un des services de calcul
-
----
 ### Purecontrol
 
 ![center](media/fonctionnement_Purecontrol_schéma_FR.png)

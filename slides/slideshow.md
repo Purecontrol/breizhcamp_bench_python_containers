@@ -443,7 +443,7 @@ TODO mettre en gras les métriques les meilleures
 
 ### Comparaison relative des résultats
 
-![](media/radar_chart.png)
+![width:900px](media/radar_chart.png)
 
 <!--
 Luc

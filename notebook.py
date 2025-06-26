@@ -126,6 +126,7 @@ def _(
     go,
     load,
     pl,
+    pprint_dict,
     stats_by_image,
 ):
     # affichage des consommations CPU et RAM
@@ -250,12 +251,12 @@ def _(
                     },
                     "ram_per_task": {
                         "value": image_stats[image_name]["ram_mean"]["value"] / tasks_nb,
-                        "unit": "%",
+                        "unit": "Mo",
                     },
                 }
 
     load_business_perfs(RESULTS_BY_IMAGE, stats_by_image)
-    # pprint_dict(stats_by_image)
+    pprint_dict(stats_by_image)
 
     return cpu_df, narrowed_cpu_df, narrowed_ram_df, plot_timeseries, ram_df
 

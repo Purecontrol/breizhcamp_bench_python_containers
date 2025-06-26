@@ -27,24 +27,13 @@ docker run --rm -v $PWD/:/home/marp/app/ -e LANG=$LANG -e MARP_USER="$(id -u):$(
 docker run --rm -v $PWD/:/home/marp/app/ -e LANG=$LANG -e MARP_USER="$(id -u):$(id -g)" marpteam/marp-cli slides/slideshow.md
 ```
 
-Documentation :
+Documentation Marp :
 
 - https://marpit.marp.app/image-syntax
+- https://chris-ayers.com/2023/03/31/customizing-marp
+- https://connaissances.fournier38.fr/entry/Utiliser%20les%20graphs%20Mermaid%20dans%20le%20Markdown
 
 ## contenu de la présentation
-
-- intégrer diagramme de fonctionnement local-pro (Luc)
-
-- comment enquêter ?
-  - métriques bas niveau du conteneur (ram, cpu) : `cadvisor`
-  - logs métier (nb de tâches traitées, durée moyenne de traitement d'une tâche)
-  - profilage du temps passé : kcachegrind
-
-- optimiser un service numérique Python (Luc)
-  - algorithmie (list comprehension)
-  - architecture (gestion des connexions à des bdd, IO, concurrence et parallélisation -> évoquer le `global interpreter lock`)
-  - `python -O mon_script.py` (docstrings supprimées, asserts ignorés, à compléter)
-  - options de compilation de l'interpréteur python
 
 - conclusions
   - nous :
@@ -58,9 +47,6 @@ Documentation :
 
 ## plan d'expérience
 
-- version ancienne de local-pro (Sébastien et Gary)
-- benchmark.py (Luc)
-
 conteneurisations :
 
 1. image docker python officielle : 3.12.11. Compilée avec `--enable-optimizations` et potentiellement avec `--with-lto` (https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.12/slim-bookworm/Dockerfile#L72-L78)
@@ -71,17 +57,6 @@ conteneurisations :
   - `--enable-optimizations` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L472
   - `--with-lto` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L509
   - pas de `PYTHON_CFLAGS="-march=native -mtune=native"`
-
-```Dockerfile
-FROM debian:bookworm-slim
-
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-RUN uv python install 3.12.11
-
-# installation de poetry
-# installation des dépendances avec poetry
-```
 
 ## Monitoring du benchmark
 
@@ -132,7 +107,7 @@ Documentation marimo :
 docker compose -f docker-compose.notebook.yml up
 ```
 
-Le notebook prend lit la variable d'environnement `BENCHMARK_SOURCES_CONFIG_FILE` indiquant le fichier JSON de configuration de l'analyse.
+Le notebook lit la variable d'environnement `BENCHMARK_SOURCES_CONFIG_FILE` indiquant le fichier JSON de configuration de l'analyse.
 Ce fichier a le format suivant :
 
 ```js

@@ -12,37 +12,16 @@ style: |
     margin-right: auto;
   }
   section {
-    font-size: 32px
+    font-size: 32px;
   }
   section.lead h1 {
-    font-size: 100px
+    font-size: 100px;
   }
+
 ---
 
+<!-- _paginate: skip -->
 
-<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-<script>
-  // https://connaissances.fournier38.fr/entry/Utiliser%20les%20graphs%20Mermaid%20dans%20le%20Markdown
-  // Replaces <pre class="mermaid"> blocks with <img> blocks, to make mermaid render properly.
-  // Preserves classes and styling so they can be used to fix sizing if necessary.
-
-  mermaid.initialize({ startOnLoad: false });
-
-  window.addEventListener('load', async function () {
-    const mermaidEls = document.querySelectorAll('pre.mermaid');
-
-    for (const el of mermaidEls) {
-      const { svg } = await mermaid.render('asd', el.textContent);
-
-      const img = document.createElement('img');
-      img.setAttribute('src', `data:image/svg+xml;base64,${btoa(svg)}`);
-      img.setAttribute('class', el.getAttribute('class'));
-      img.setAttribute('style', el.getAttribute('style') || '');
-
-      el.parentNode.replaceChild(img, el);
-    }
-  });
-</script>
 
 <!-- _class: lead -->
 # Conteneurisation de Python
@@ -52,7 +31,14 @@ Chute de performances et investigations
 _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin 2025"
  -->
 
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+</script>
+
 ---
+
+<!-- paginate: true -->
 
 ## Qui sommes-nous ?
 
@@ -172,10 +158,39 @@ On en profite pour passer de 3.8 à 3.12 😁
 
 ---
 
-## Quels sont les points d'optimisation d'un service numérique python ?
+## Quels sont les points d'optimisation d'un service numérique (Python) ?
+
+(Luc : j'enlèverais bien les 3 puces pour laisser la salle répondre - on peut avoir des bonnes surprises - et garder le suspense sur l'optimisation du runtime)
+
 - algorithmie
 - architecture
 - optimisation du runtime
+
+---
+
+### Profilage
+
+- Cprofile + kcachegrind
+- pyinstrument
+- py-spy
+- voir [Fantastic bits and where to find them : benchmark et profilage - Michel Caradec](https://www.youtube.com/watch?v=eY5k9GcHRVM) (Python Rennes, 5 décembre 2024)
+
+Dans notre cas, la perte de performance était diluée dans tout le code 😕
+
+<!-- Utiliser un profiler comme `kcachegrind` sur les résultats de Cprofile.
+
+Pour visualiser :
+
+- Fonctions les plus coûteuses
+- Appels imbriqués
+- Consommation CPU par bloc de code
+
+En comparant avant et après, cela pourrait permettre d'identifier un endroit ou l'on passe plus de temps, responsable d'une perte de performance.
+
+```python
+python -m cProfile -o prof.out my_app.py && pyprof2calltree -i prof.out -o callgrind.out && kcachegrind callgrind.out
+``` -->
+
 ---
 
 ### Algorithmie - 1
@@ -183,7 +198,7 @@ On en profite pour passer de 3.8 à 3.12 😁
 ```python
 cursor.execute(t"SELECT * FROM tasks LIMIT 100")
 tasks = []
-for record in cursor:
+for record in cursor: # allers-retours entre l'interprétation et l'exécution
   tasks.append(Task.from_db_record(record))
 execute_tasks(tasks)
 ```
@@ -235,7 +250,7 @@ def transfer_money(amount: float, account):
   - `-O` : les assertions, les blocs `if __debug__:`
   - `-OO` : les docstrings aussi
 
--> éviter d'exprimer les vérifications métier avec des `assert`
+<!-- -> éviter d'exprimer les vérifications métier avec des `assert` -->
 
 ---
 
@@ -250,15 +265,17 @@ def transfer_money(amount: float, account):
 
 ### Optimisation du runtime python
 
-Différentes optimisations durant les phases de compilations :
+Différentes optimisations durant les phases de compilation :
 
 ![center](./media/optimizations.drawio.svg)
 
-Voir les options de compilation du runtime :
+Pour voir les options de compilation du runtime :
 
 ```sh
 python3 -m sysconfig | grep CONFIG_ARGS
 ```
+
+(voir [docs.python.org/3/using/configure.html](https://docs.python.org/3/using/configure.html#performance-options))
 
 <!-- Seb
 Compiler level optimisation
@@ -283,13 +300,7 @@ Compilation normale -> Profilage (optionnel) -> Optimisation du binaire
 
 Réarrangement des fonctions/blocs (layout), ICF, optimisation des tables de saut, etc.
 Optimisation cache
-
-
-Flags
-
-https://docs.python.org/3/using/configure.html#performance-options
-
- -->
+-->
 
 ---
 
@@ -344,114 +355,81 @@ Sinon ➜ crash, `illegal instruction`.
 
 ### Collecte des métriques système
 
-<pre class="mermaid">
+<div class="mermaid">
   flowchart LR
-    bench -..->| mesures CPU et RAM | cAdvisor
+    benchmark -..->| 🔎 CPU, RAM | cAdvisor
     subgraph monitoring
-      cAdvisor -..->| scrapping / 5s | prometheus
-      prometheus -..->| dashboard | grafana
+      cAdvisor -..->| 💾 / 5s | prometheus
+      prometheus -..->| 📊 🗠 | grafana
     end
-</pre>
+</div>
 
-<!-- Pour suivre en temps réel :
-
-- l'usage Mémoire
-- l'usage CPU
-- l'usage I/O disque & réseau
-
-Idéal pour détecter une **saturation système**
-
-
-Exploiter les **logs et métriques** pour suivre :
-
-- Nombre de tâches traitées par minute
-- Durée moyenne de traitement par tâche
-- Les tâches en echecs.
-
-Permet d'avoir une vision fonctionnelle de la performance de notre application.
-
-Utiliser un profiler comme `kcachegrind` sur les résultats de Cprofile.
-
-Pour visualiser :
-
-- Fonctions les plus coûteuses
-- Appels imbriqués
-- Consommation CPU par bloc de code
-
-En comparant avant et après, cela pourrait permettre d'identifier un endroit ou l'on passe plus de temps, responsable d'une perte de performance.
-
-```python
-python -m cProfile -o prof.out my_app.py && pyprof2calltree -i prof.out -o callgrind.out && kcachegrind callgrind.out
-```
- -->
----
-
-### présentation du bench et des différentes images LUC todo reformuler
-
-On a compilé et mesuré le temps de création des conteneurs.
-
-une stack docker compose avec:
-- cadvisor
-- prometheus
-- grafana
+- [cAdvisor](https://github.com/google/cadvisor) : suit les ressources système consommées par les conteneurs
+- [prometheus](https://prometheus.io/) : collecte et persiste des métriques exposées par des endpoints (télémétrie)
+- [grafana](https://grafana.com/grafana/dashboards/) : agrégation et visualisation temps réel
 
 ---
 
-Maquette de notre applicatif python:
-- Cpu heavy
-- IO
-- en continue sur 30 minutes. 
-
-<!-- Cadvisor génère des métriques sur les conteneurs, prometheus les scraps et les stocks, grafana nous permets de les visualiser.  -->
----
-
-### Comparatif de nos images
+### Runtimes python des images testées
 
 <!-- style: table{font-size:.55em} -->
 
+| Image | `--enable-optimizations` | `--with-lto`  | `-march = native` | `-mtune = native`| `--enable-bolt` | **Compilateur** |
+|--|:--:|:--:|:--:|:--:|:--:|:--:|
+| **debian**             | ❌ | ❌ | ❌ | ❌ | ❌ | GCC |
+| python **official**    | ✅ | ✅ | ❌ | ❌ | ❌ | GCC |
+| **pyenvbasic**         | ❌ | ❌ | ❌ | ❌ | ❌ | GCC |
+| **pyenvopt**           | ✅ | ✅ | ❌ | ❌ | ❌ | GCC |
+| **pyenvoptmarch**      | ✅ | ✅ | ✅ | ✅ | ❌ | GCC |
+| **pyenvoptmarchbolt**  | ✅ | ✅ | ✅ | ✅ | ✅ | GCC |
+| **uv**                 | ✅ | ✅ | ❌ | ❌ | ✅ | **Clang** |
 
-| Image            | `--enable-optimizations` | `--with-lto` | `--enable-bolt` | `-march = native` | `-mtune = native` | **Compilateur** |
-|------------------------|:---------------------------------:|:------------:|:---------------:|:-------------------:|:-------------------:|:---------------:|
-| **debian**             | ✘ | ✘ | ✘ | ✘ | ✘ | **GCC** |
-| **official (slim)**    | ✔︎ | ✔︎ | ✘ | ✘ | ✘ | **GCC** |
-| **pyenvbasic**         | ✘ | ✘ | ✘ | ✘ | ✘ | **GCC** |
-| **pyenvopt**           | ✔︎ | ✔︎ | ✘ | ✘ | ✘ | **GCC** |
-| **pyenvoptmarch**      | ✔︎ | ✔︎ | ✘ | ✔︎ | ✔︎ | **GCC** |
-| **pyenvoptmarchbolt**  | ✔︎ | ✔︎ | ✔︎ | ✔︎ | ✔︎ | **GCC** |
-| **uv**  | ✔︎ | ✔︎ | ✔︎ | ✘ | ✘ | **Clang** |
+```sh
+docker run --rm -it my-python-image:latest bash
+$ python3 -m sysconfig | grep PYTHON_CFLAGS
+```
 
 ---
 
-### résultats #LUC
+### Tableau de résultats
 
+| **Image** | **temps de build** | **taille Mo** | **CPU %** | **RAM Mo** | **tâches / min** | **CPU / tâche** | **RAM / tâche** |
+|---|---|---|---|---|---|---|---|
+| **debian** | 16 s | 121 | 19,7 | 911 | 563,4 | 1,16 E-3 | 53,9 ko |
+| **official** | 7 s | 124 | 27,1 | 888 | 567,6 | 1,5 E-3 | 52,1 ko |
+| **pyenvbasic** | 236 (3:55) | 388 | 32,9 | 870 | 558,5 | 1,9 E-3 | 51,9 ko |
+| **pyenvopt** | 1297 (21:37) | 449 | 24,3 | 886 | 572,03 | 1,41 E-3 | 51,6 ko |
+| **pyenvoptmarch** | 1359 (22:39) | 450 | 23,5 | 900 | 572,06 | 1,37 E-3 | 51,6 ko |
+| **pyenvoptmarchbolt** | 1562 (26:03) | 500 | 24,2 | 925 | 569,2 | 1,42 E-3 | 54,1 ko |
+| **uv** | 15 s | 227 | 20,5 | 974 | 577,4 | 1,18 E-3 | 56,2 ko |
 
-- nombre de calculs faits chaque minute
-- durée moyenne d'un calcul
-- CPU et RAM mobilisée
+Attention :
+- résultats collectés sur un essai
+- fait sur une architecture (i7-6600U CPU @ 2.60GHz, 4 coeurs)
+- relatifs à l'application de test
+
+---
+
+### Comparaison relative des résultats
+
+![](media/radar_chart.png)
 
 ---
 
 ## Conclusions
 
-- python est un langage interprété, son interpréteur est compilé ; des options de compilations existent (https://docs.python.org/3/using/configure.html#general-options, https://docs.python.org/3/using/configure.html#performance-options)
-
-- (https://stackoverflow.com/questions/10192758/how-to-get-the-list-of-options-that-python-was-compiled-with)
-
-```sh
-# configuration de python
-python3 -m sysconfig
-python3 -m sysconfig | grep CONFIG_ARGS
-```
-
-- pyenv installe depuis les sources, configuration du build avec des drapeaux ou des variables d'environnement
-- python-build-standalone (utilisé par uv) produit des binaires optimisés avec `--enable-optimizations` (https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L472), mais d'autres drapeaux d'optimisation spécifique (à l'architecture du CPU) ne sont pas utilisés
+- ⚠️ les résultats d'un benchmark sont contextuels à l'application et l'infrastructure
+- ⚠️ profilez avant d'optimiser
+* importance de la télémétrie pour comparer avant / après
+* stack de monitoring système : cAdvisor + prometheus + grafana
+* les options de compilation de l'interpréteur `python` ont un impact sur le CPU
+* 💙💛 [uv](https://github.com/astral-sh/uv) ([python-build-standalone](https://github.com/astral-sh/python-build-standalone)) : en local ou dans un conteneur
 
 ---
 
 ## Merci !
 
-Vos questions
+- vos questions
+- vos retours via openfeedback
 
-Vos retours via openfeedback :
-
-![width:400px](media/openfeedback_qrcode.svg)
+![width:300px](media/openfeedback_qrcode.svg)

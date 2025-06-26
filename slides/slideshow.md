@@ -17,7 +17,6 @@ style: |
   section.lead h1 {
     font-size: 100px;
   }
-
 ---
 
 <!-- _paginate: skip -->
@@ -42,12 +41,11 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ## Qui sommes-nous ?
 
-* Luc Sorel-Giffo : lead dev [@See you sun](https://seeyousun.fr/)
+* Luc Sorel-Giffo : lead dev [@See you sun](https://seeyousun.fr/) ![width:120px](media/seeyousun_logo.png)
   - ex-Purecontrol 🫶
-  - co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/) 🔔
-  - [@lucsorelgiffo@floss.social](https://floss.social/@lucsorelgiffo)
-* Sébastien Baguet : infra lead et devOps [@Purecontrol](https://www.purecontrol.com/)
-* Gaston Gary : dev [@Purecontrol](https://www.purecontrol.com/)
+  - co-animation [Python Rennes](https://www.meetup.com/fr-FR/python-rennes/) ![width:50px](media/python-rennes_logo.png) 🔔
+* Sébastien Baguet : infra lead et devOps [@Purecontrol](https://www.purecontrol.com/) ![width:90px](media/purecontrol_logo.png)
+* Gaston Gary : dev [@Purecontrol](https://www.purecontrol.com/) ![width:90px](media/purecontrol_logo.png)
 
 ---
 ### Purecontrol
@@ -157,9 +155,9 @@ Gaston ou Sébastien
 
 ## Quels sont les points d'optimisation d'un service numérique (Python) ?
 
-- algorithmie
-- architecture
-- optimisation du runtime
+* algorithmie
+* architecture
+* optimisation de l'exécution
 
 <!--
 Luc
@@ -170,9 +168,9 @@ Luc
 ### Profilage
 
 - Cprofile + kcachegrind
-- pyinstrument
-- py-spy
-- voir [Fantastic bits and where to find them : benchmark et profilage - Michel Caradec](https://www.youtube.com/watch?v=eY5k9GcHRVM) (Python Rennes, 5 décembre 2024)
+- [pyinstrument](https://pyinstrument.readthedocs.io)
+- [py-spy](https://github.com/benfred/py-spy)
+- voir 📽️ [Fantastic bits and where to find them : benchmark et profilage - Michel Caradec](https://www.youtube.com/watch?v=eY5k9GcHRVM) (Python Rennes, 5 décembre 2024)
 
 Dans notre cas, la perte de performance était diluée dans tout le code 😕
 
@@ -198,29 +196,30 @@ python -m cProfile -o prof.out my_app.py && pyprof2calltree -i prof.out -o callg
 
 ### Algorithmie - 1
 
+- CPU : réduire les allers-retours entre l'interprétation du code et son exécution
+  - compréhensions de listes / dictionnaire
+* RAM : utiliser des générateurs
+  - pour déléguer l'exécution d'une itération
+  - pour streamer un traitement entrée par entrée
+* ⚠️ lisibilité du code, overhead des générateurs
+
+<!--
+Luc
+
 ```python
 cursor.execute(t"SELECT * FROM tasks LIMIT 100")
 tasks = []
-for record in cursor: # allers-retours entre l'interprétation et l'exécution
+for record in cursor:
   tasks.append(Task.from_db_record(record))
 execute_tasks(tasks)
 ```
 
 ```python
-tasks = [
-  Task.from_db_record(record)
-  for record in cursor
-] # le corps de la compréhension est exécuté "d'un coup"
-```
-
-```python
+cursor.execute(t"SELECT * FROM tasks LIMIT 100")
 execute_tasks(
   Task.from_db_record(record) for record in cursor
 ) # générateur streamant les tâches
 ```
-
-<!--
-Luc
 -->
 
 ---
@@ -228,7 +227,7 @@ Luc
 ### Algorithmie - 2
 
 - Python est un langage interprété 🐌
-* facilite l'encapsulation de binaires pour les traitements CPU ⚡
+* conçu pour encapsulation facile de binaires pour les traitements CPU ⚡
   - numpy, pandas, polars
   - Tensorflow, pytorch, jax
 
@@ -363,7 +362,7 @@ Gaston
 
 <div class="mermaid">
   flowchart LR
-    benchmark -..->| 🔎 CPU, RAM | cAdvisor
+    benchmark -..->|" 🔎 CPU, RAM "| cAdvisor
     subgraph monitoring
       cAdvisor <-..- | 💾 / 5s | prometheus
       prometheus -..->| 📊 🗠 | grafana
@@ -411,26 +410,26 @@ Sous le capot
   - Si on veux aller plus loin et profiter d'option de compilation spécifique pour des CPUs plus récent, il est possible de recompiler son python-build-standalone en précisant un set de flag plus récent (ex ./build-linux.py --options pgo+lto --target x86_64_v4-unknown-linux-gnu)
 
 Option --enable-shared de python pour activer la librarie partagé
-/!\ debian et ubuntu l'utilise mais ensuite statifie le runtime
+/!\ debian et ubuntu l'utilise mais ensuite rendent statique le runtime
 -->
 
 ---
 
 ### Tableau de résultats
 
-| **Image** | **temps de build** | **taille Mo** | **CPU %** | **RAM Mo** | **tâches / min** | **CPU / tâche** | **RAM / tâche** |
-|---|---|---|---|---|---|---|---|
-| **debian** | 16 s | 121 | 19,7 | 911 | 563,4 | 1,16 E-3 | 53,9 ko |
-| **official** | 7 s | 124 | 27,1 | 888 | 567,6 | 1,5 E-3 | 52,1 ko |
-| **pyenvbasic** | 236 (3:55) | 388 | 32,9 | 870 | 558,5 | 1,9 E-3 | 51,9 ko |
-| **pyenvopt** | 1297 (21:37) | 449 | 24,3 | 886 | 572,03 | 1,41 E-3 | 51,6 ko |
-| **pyenvoptmarch** | 1359 (22:39) | 450 | 23,5 | 900 | 572,06 | 1,37 E-3 | 51,6 ko |
-| **pyenvoptmarchbolt** | 1562 (26:03) | 500 | 24,2 | 925 | 569,2 | 1,42 E-3 | 54,1 ko |
-| **uv** | 15 s | 227 | 20,5 | 974 | 577,4 | 1,18 E-3 | 56,2 ko |
+| **Image**       | **Temps de build** | **Taille Mo** | **CPU %** | **RAM Mo** | **tâches / min** | **CPU / tâche** | **RAM / tâche** |
+|-----------------------|--------------|---------------|-----------|------------|------------------|-----------------|-----------------|
+| **debian**            | 16 s         | **121**       | 19,7      | 911        | 563,4            | **1,16 E-3**    | 53,9 ko         |
+| **official**          | **7 s**      | **124**       | 27,1      | 888        | 567,6            | 1,5 E-3         | 52,1 ko         |
+| **pyenvbasic**        | 236 (3:55)   | 388           | 32,9      | 870        | 558,5            | 1,9 E-3         | 51,9 ko         |
+| **pyenvopt**          | 1297 (21:37) | 449           | 24,3      | 886        | 572,03           | 1,41 E-3        | **51,6 ko**     |
+| **pyenvoptmarch**     | 1359 (22:39) | 450           | 23,5      | 900        | 572,06           | 1,37 E-3        | **51,6 ko**     |
+| **pyenvoptmarchbolt** | 1562 (26:03) | 500           | 24,2      | 925        | 569,2            | 1,42 E-3        | 54,1 ko         |
+| **uv**                | 15 s         | 227           | 20,5      | 974        | **577,4**        | **1,18 E-3**    | 56,2 ko         |
 
-Attention :
-- résultats collectés sur un essai
-- fait sur une architecture (i7-6600U CPU @ 2.60GHz, 4 coeurs)
+⚠️ Résultats :
+- collectés sur un essai
+- fait sur une architecture (i7-6600U CPU @ 2.60GHz, 4 cœurs)
 - relatifs à l'application de test
 
 <!--

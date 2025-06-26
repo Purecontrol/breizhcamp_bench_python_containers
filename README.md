@@ -12,7 +12,7 @@ Le trio :
 - Sébastien Baguet : spécialiste infrastructure et conteneurisation
 - Luc Sorel-Giffo : spécialiste Python
 
-## Diaporama
+## Lancer le diaporama
 
 ```sh
 # lancement d'un serveur web permettant de visualiser la présentation dans un navigateur, qui s'auto-rafraichit
@@ -21,7 +21,6 @@ docker run --rm --init -v $PWD:/home/marp/app -e LANG=$LANG -p 8080:8080 -p 3771
 
 # génération et mise à jour en temps réel du fichier html
 docker run --rm -v $PWD/:/home/marp/app/ -e LANG=$LANG -e MARP_USER="$(id -u):$(id -g)" marpteam/marp-cli -w slides/slideshow.md
-
 
 # génération du fichier slides/slideshow.html
 docker run --rm -v $PWD/:/home/marp/app/ -e LANG=$LANG -e MARP_USER="$(id -u):$(id -g)" marpteam/marp-cli slides/slideshow.md
@@ -33,41 +32,19 @@ Documentation Marp :
 - https://chris-ayers.com/2023/03/31/customizing-marp
 - https://connaissances.fournier38.fr/entry/Utiliser%20les%20graphs%20Mermaid%20dans%20le%20Markdown
 
-## contenu de la présentation
+## Avec quelles options un binaire Python a-t-il été compilé ?
 
-- conclusions
-  - nous :
-    - le profilage du temps d'exécution ne nous a pas aidé
-    - [transition vers conclusions génériques] mesurer avant d'optimiser (et après !)
-  - plus génériques
-    - `python -O` intéressant mais rarement utilisé
-    - pyenv par défaut : installation rapide de python mais sans aucune option d'optimisation /!\
-    - pyenv avec options d'optimisation : installation lente (on ne le fait pas tous les jours sur son poste ; attention à la CI -> utiliser des images python pré-compilées), mais améliorations conséquentes !
-    - uv + python-build-standalone : un binaire python portable a longtemps été une difficulté (différents chemins de fichiers en dur) mais l'ambition de ce projet est de fournir des binaires pré-compilés -> options d'optimisation incluses (à vérifier) et temps de téléchargement rapide
+Avant que nous découvrions la commande `python3 -m sysconfig | grep CONFIG_ARGS`, nous avons regardé le code source de différents projets pour déterminer les options de compilation d'un binaire Python :
 
-## plan d'expérience
-
-conteneurisations :
-
-1. image docker python officielle : 3.12.11. Compilée avec `--enable-optimizations` et potentiellement avec `--with-lto` (https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.12/slim-bookworm/Dockerfile#L72-L78)
-2. image pyenv sans aucune option d'otimisation dans pyenv
-3. image pyenv avec les options d'otimisation `PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"` dans pyenv
-4. image pyenv avec les options d'otimisation `PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"` et `PYTHON_CFLAGS="-march=native -mtune=native"` dans pyenv
-5. (option) avec la version [python-build-standalone](https://github.com/astral-sh/python-build-standalone) installée avec [uv](https://docs.astral.sh/uv/guides/install-python/) ?
+- image docker python officielle : 3.12.11. Compilée avec `--enable-optimizations` et potentiellement avec `--with-lto` (https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.12/slim-bookworm/Dockerfile#L72-L78)
+- la version [python-build-standalone](https://github.com/astral-sh/python-build-standalone) installée avec [uv](https://docs.astral.sh/uv/guides/install-python/) ?
   - `--enable-optimizations` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L472
   - `--with-lto` : https://github.com/astral-sh/python-build-standalone/blob/main/cpython-unix/build-cpython.sh#L509
-  - pas de `PYTHON_CFLAGS="-march=native -mtune=native"`
-
-### Comparaison de Dockerfiles officiels
-
-- https://hub.docker.com/_/python/
-  - https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.11/slim-bookworm/Dockerfile#L72-L95
-
-
-pyenv, voir :
-- https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#special-environment-variables : CONFIGURE_OPTS
-- https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#building-for-maximum-performance : --enable-optimizations
-
+  - pas de `PYTHON_CFLAGS="-march=native -mtune=native"` ?
+- debian bookworm : https://github.com/docker-library/python/blob/14b61451ec7c172cf1d43d8e7859335459fcd344/3.11/slim-bookworm/Dockerfile#L72-L95
+- documentation sur les options d'installation de python avec pyenv :
+  - https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#special-environment-variables : CONFIGURE_OPTS
+  - https://github.com/pyenv/pyenv/blob/master/plugins/python-build/README.md#building-for-maximum-performance : --enable-optimizations
 
 ## Monitoring du benchmark
 
@@ -109,6 +86,9 @@ docker compose -f docker-compose.monitoring.yml down
 
 ### Notebook d'analyse du benchmark
 
+Nous avons utilisé un notebook [marimo](https://docs.marimo.io/) (une alternative à jupyter afin d'avoir des notebooks reproductibles), avec plotly et polars.
+Le code du notebook est dans le fichier [notebook.py](notebook.py).
+
 Documentation marimo :
 
 - https://docs.marimo.io/guides/deploying/deploying_docker/
@@ -118,21 +98,21 @@ Documentation marimo :
 docker compose -f docker-compose.notebook.yml up
 ```
 
-Le notebook lit la variable d'environnement `BENCHMARK_SOURCES_CONFIG_FILE` indiquant le fichier JSON de configuration de l'analyse.
+Le notebook lit la variable d'environnement `BENCHMARK_SOURCES_CONFIG_FILE` indiquant le fichier JSON indiquant les chemins de fichier de résultat utilisés par le notebook.
 Ce fichier a le format suivant :
 
 ```js
 {
     "build_results_dir": "1_build_times",
-    "build_times": "2025-06-22_135819-build_times.txt",
+    "build_times": "2025-06-23_232911-build_times.txt",
     "benchmark_results_dir": "2_benchmark_results",
-    "cpu_usage": "2025-06-23_134155-CPU_Usage-data-as-joinbyfield.csv",
-    "ram_usage": "2025-06-23_134155-Memory_Usage-data-as-joinbyfield.csv",
+    "cpu_usage": "CPU_Usage-data-as-joinbyfield-2025-06-24 09_26_36.csv",
+    "ram_usage": "Memory_Usage-data-as-joinbyfield-2025-06-24 09_27_47.csv",
     "images": {
         "debian": {
           // couleur utilisée pour les graphiques de cette image docker
-          "color": "#A80030",
-          // début du fichier, sans le nom de l'image ni l'extension ("2025-06-23T02-58-28" pour "2025-06-23T02-58-28_debian.json")
+            "color": "#A80030",
+          // début du fichier, sans le nom de l'image ni l'extension ("2025-06-24T00-49-05" pour "2025-06-24T00-49-05_debian.json")
             "results_prefix": "2025-06-24T00-49-05"
         },
         "official": {

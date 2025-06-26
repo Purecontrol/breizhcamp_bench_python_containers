@@ -262,20 +262,27 @@ def _(
 
 
 @app.cell
+def _(COLORS_BY_IMAGE: dict[str, str], cpu_df, plot_timeseries):
+    plot_timeseries(cpu_df, COLORS_BY_IMAGE, "Évolution des consommations CPU des différentes images")
+
+    return
+
+
+@app.cell
+def _(COLORS_BY_IMAGE: dict[str, str], narrowed_cpu_df, plot_timeseries):
+    plot_timeseries(narrowed_cpu_df, COLORS_BY_IMAGE, "Évolution des CPU des différentes images sans les rampes")
+    return
+
+
+@app.cell
 def _(
     COLORS_BY_IMAGE: dict[str, str],
-    cpu_df,
-    narrowed_cpu_df,
     narrowed_ram_df,
     plot_timeseries,
     ram_df,
 ):
-    plot_timeseries(cpu_df, COLORS_BY_IMAGE, "Évolution des consommations CPU des différentes images")
-    plot_timeseries(narrowed_cpu_df, COLORS_BY_IMAGE, "Évolution des CPU des différentes images sans les rampes")
-
     plot_timeseries(ram_df, COLORS_BY_IMAGE, "Évolution des consommations RAM des différentes images")
     plot_timeseries(narrowed_ram_df, COLORS_BY_IMAGE, "Évolution des RAM des différentes images sans les rampes")
-
     return
 
 

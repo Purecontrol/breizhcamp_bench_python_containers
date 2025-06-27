@@ -1,9 +1,9 @@
 {
-    "duration_sec":          10,    
-    "size_mo":          4,       
-    "nb_ops_io":          8,      
-    "nb_threads_io":      8,      
-    "iterations_cpu":     50000,    
-    "nb_proc":            16,     
-    "max_task_wait_mult": 50      
-  }
+  "duration_sec": 1800,
+  "size_mo": 16,
+  "nb_ops_io": 16,
+  "nb_threads_io": 8,
+  "iterations_cpu": 50000,
+  "nb_proc": 16,
+  "max_task_wait_mult": 50
+}

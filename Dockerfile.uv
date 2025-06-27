@@ -1,0 +1,13 @@
+FROM debian:bookworm-slim
+ARG PYTHON_VERSION=3.12.11
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+RUN uv python install ${PYTHON_VERSION} --default --preview
+
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY benchmark.py .
+
+CMD ["uv", "run", "benchmark.py", "--config", "config.json"]

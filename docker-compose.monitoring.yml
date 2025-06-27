@@ -1,0 +1,50 @@
+services:
+  cadvisor:
+    container_name: monitor_cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
+    hostname: cadvisor
+    platform: linux/amd64/v3
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+  fix_prometheus_data:
+    container_name: monitor_fix_prometheus_data
+    image: busybox
+    command: ["/bin/chmod","-R","777", "/prometheus"]
+    volumes:
+      - ./prometheus-data:/prometheus
+
+  prometheus:
+    container_name: monitor_prometheus
+    image: prom/prometheus
+    command:
+    - --config.file=/etc/prometheus/prometheus.yaml
+    volumes:
+      - ./prometheus-data:/prometheus
+      - ./prometheus-scrape-config.yaml:/etc/prometheus/prometheus.yaml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - fix_prometheus_data
+
+  grafana:
+    container_name: monitor_grafana
+    image: grafana/grafana
+    environment: 
+      GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_SIGNOUT_MENU: "true"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./grafana-datasource-config.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    ports:
+      - "9100:3000"
+    depends_on:
+      - prometheus

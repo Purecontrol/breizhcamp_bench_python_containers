@@ -1,6 +1,6 @@
-FROM ubuntu:24.04 AS builder
+FROM debian:bookworm-slim AS builder
 
-ARG PYTHON_VERSION=3.12.3
+ARG PYTHON_VERSION=3.12.11
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
@@ -15,15 +15,14 @@ ENV PYENV_ROOT=/python
 RUN curl -fsSL https://pyenv.run | bash
 ENV PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
 
-ENV PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto" \
-    PYTHON_CFLAGS="-march=native -mtune=native"
+ENV PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto"
 
 RUN pyenv install -v "${PYTHON_VERSION}" && \
     pyenv global  "${PYTHON_VERSION}"
 
-FROM ubuntu:24.04
+FROM debian:bookworm-slim
 
-ARG PYTHON_VERSION=3.12.3
+ARG PYTHON_VERSION=3.12.11
 
 COPY --from=builder /python/versions/${PYTHON_VERSION} /opt/python
 ENV PATH="/opt/python/bin:$PATH"

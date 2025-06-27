@@ -1,0 +1,16 @@
+*
+# benchmark content
+!benchmark.py
+!config.json
+# benchmarked images
+!Dockerfile.debian
+!Dockerfile.official
+!Dockerfile.pyenv.basic
+!Dockerfile.pyenv.opt
+!Dockerfile.pyenv.optmarch
+!Dockerfile.pyenv.optmarchbolt
+!Dockerfile.uv
+# marimo notebook
+!Dockerfile.marimo
+!requirements.marimo.txt
+!notebook.py

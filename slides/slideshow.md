@@ -132,7 +132,7 @@ Gaston
 
 - **diminution** du nombre de tâches calculées chaque minute de **30%**
 - accumulation rapide de **retard**
-- optimisation dégradée des pilotages
+- dégradation des pilotages
 
 <!--
 Gaston ou Sébastien

@@ -2,21 +2,6 @@
 marp: true
 theme: gaia
 
-style: |
-  img[alt~="center"] {
-    display: block;
-    margin: 0 auto;
-  }
-  section.center table {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  section {
-    font-size: 32px;
-  }
-  section.lead h1 {
-    font-size: 100px;
-  }
 ---
 
 <!-- _paginate: skip -->
@@ -34,6 +19,22 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true });
 </script>
+<style>
+  img[alt~="center"] {
+    display: block;
+    margin: 0 auto;
+  }
+  section.center table {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  section {
+    font-size: 32px;
+  }
+  section.lead h1 {
+    font-size: 100px;
+  }
+</style>
 
 ---
 
@@ -52,7 +53,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
 
 ![center](media/fonctionnement_Purecontrol_schéma_FR.png)
 
-<!-- 
+<!--
 Gaston
 
 Purecontrol est une société Rennaise, qui propose une solution de contrôle-commande basée sur l’intelligence artificielle ; On pilote en temps réel les procédés industriels liés à l’eau et à l’énergie pour réduire simultanément la consommation, les coûts d’exploitation et les émissions de CO₂.
@@ -264,7 +265,7 @@ def transfer_money(amount: float, account):
   - `-O` : les assertions, les blocs `if __debug__:`
   - `-OO` : les docstrings aussi
 
-<!-- 
+<!--
 Luc
 
 -> éviter d'exprimer les vérifications métier avec des `assert`
@@ -307,8 +308,6 @@ CPython est un programme écrit en C
 Compilation vu d'avion :
 On prend chaque fichier C -> Compilation -> génération code assembleur puis machine
 Ensuite étape d'édition de lien (link) qui va prendre l'intégralité des fichiers et les rassembler
-
-
 
 Compiler level optimisation
 
@@ -411,6 +410,8 @@ $ ldd <path-to-my-python> | grep libpython
 
 <!--
 Sébastien
+
+Binaire
 
 Sous le capot
 - pyenv recompile son runtime python

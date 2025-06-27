@@ -388,15 +388,15 @@ Container Advisor
 
 <!-- style: table{font-size:.55em} -->
 
-| Image                 | **Compilateur** | **CFLAGS**    | `--enable-optimizations` | `--with-lto`  | `--enable-bolt` | Binaire statique |
+| Image                 | **Compilateur** | **CFLAGS**    | `--enable-optimizations` | `--with-lto`  | `--enable-bolt` | Librairie partagée |
 |-----------------------|:---------------:|:-------------:|:------------------------:|:-------------:|:---------------:|:----------------:|
-| **debian**            | GCC             |               | ❌                       | ❌            | ❌              | ✅               |
-| python **official**   | GCC             |               | ✅                       | ✅            | ❌              | ❌               |
-| **pyenvbasic**        | GCC             |               | ❌                       | ❌            | ❌              | ❌               |
-| **pyenvopt**          | GCC             |               | ✅                       | ✅            | ❌              | ❌               |
-| **pyenvoptmarch**     | GCC             | `tune=native` | ✅                       | ✅            | ❌              | ❌               |
-| **pyenvoptmarchbolt** | GCC             | `tune=native` | ✅                       | ✅            | ✅              | ❌               |
-| **uv**                | Clang           |               | ✅                       | ✅            | ✅              | ✅               |
+| **debian**            | GCC             |               | ❌                       | ❌            | ❌              | ❌               |
+| python **official**   | GCC             |               | ✅                       | ✅            | ❌              | ✅               |
+| **pyenvbasic**        | GCC             |               | ❌                       | ❌            | ❌              | ✅               |
+| **pyenvopt**          | GCC             |               | ✅                       | ✅            | ❌              | ✅               |
+| **pyenvoptmarch**     | GCC             | `tune=native` | ✅                       | ✅            | ❌              | ✅               |
+| **pyenvoptmarchbolt** | GCC             | `tune=native` | ✅                       | ✅            | ✅              | ✅               |
+| **uv**                | Clang           |               | ✅                       | ✅            | ✅              | ❌               |
 
 ```sh
 docker run --rm -it my-python-image:latest bash
@@ -416,7 +416,7 @@ Sous le capot
 - uv télécharge des binaires depuis le projet python-build-standalone récement récupéré par astral (https://astral.sh/blog/python-build-standalone)
 
 
-- Différents compilo
+- Différents compilo (GNU Compiler Collection, CLANG)
 - Binaire statique vs librarie partagé
   - Librairie partagé pour python ? Permet d'embarquer le runtime python dans un programme écrit en C ou autre language
   - On verra plus tard que ça a peut être un impact

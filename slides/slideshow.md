@@ -120,7 +120,7 @@ Avantages classiques d'une image :
 On en profite pour passer de 3.8 à 3.12 😁
 
 <!--
-Gaston ou Sébastien
+Gaston
 -->
 
 ---
@@ -146,7 +146,7 @@ Gaston ou Sébastien
 * la montée de version de Python ?
 
 <!--
-Gaston ou Sébastien
+Gaston
 
 "Quels sont les points d'optimisation d'un service numérique (Python) ?"
 -->
@@ -287,7 +287,7 @@ Luc
 
 ### Optimisation du runtime python
 
-Différentes optimisations durant le build du runtime (en C)
+Différentes optimisations durant le build du runtime CPython
 
 ![center](./media/optimizations.drawio.svg)
 
@@ -301,6 +301,14 @@ python3 -m sysconfig | grep CONFIG_ARGS
 
 <!--
 Seb
+
+CPython est un programme écrit en C
+
+Compilation vu d'avion :
+On prend chaque fichier C -> Compilation -> génération code assembleur puis machine
+Ensuite étape d'édition de lien (link) qui va prendre l'intégralité des fichiers et les rassembler
+
+
 
 Compiler level optimisation
 

@@ -19,6 +19,7 @@ _footer: "Sébastien Baguet, Gaston Gary, Luc Sorel-Giffo - BreizhCamp - 27 juin
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true });
 </script>
+
 <style>
   img[alt~="center"] {
     display: block;
@@ -288,7 +289,8 @@ Luc
 
 ### Optimisation du runtime python
 
-Différentes optimisations durant le build du runtime CPython
+- CPython est écrit en C
+- Différents process d'optimisation du binaire
 
 ![center](./media/optimizations.drawio.svg)
 
@@ -303,34 +305,27 @@ python3 -m sysconfig | grep CONFIG_ARGS
 <!--
 Seb
 
-CPython est un programme écrit en C
-
-Compilation vu d'avion :
-On prend chaque fichier C -> Compilation -> génération code assembleur puis machine
-Ensuite étape d'édition de lien (link) qui va prendre l'intégralité des fichiers et les rassembler
+Compilation vu d'avion
+Chaque fichier C -> génération code assembleur puis machine
+Ensuite édition de lien (link) -> Rassemble
 
 Compiler level optimisation
-
--O3 -> va optimiser fichier par fichier
--march=native -> Séléction de l'architecture courante comme cible
-/!\ pas compatible avec un CPU qui n'aurait pas les instructions
-Voir ici pour les subset https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+Fichier par fichier / Utilisation d'instruction CPU spécifique
 
 Profile Guided optimization
 Compilation instrumenté -> Execution -> Recompilation optimisé
-
 Inlining, réorganisation des blocs, optimisation des boucles, etc.
 
 Link Time Optimization
-Optimisation multi fichier .o
+Optimisation multi fichier / Analyse du programme entier
 
-Analyse statique du programme entier
+Post Link Optimization - BOLT
+Travail sur le binaire
+optimisation des tables de saut / Optimisation de l'utilisation du cache
 
-Post Link Optimization
-Compilation normale -> Profilage (optionnel) -> Optimisation du binaire
+Petit bémol quand même sur ces premiers flags
 
-Réarrangement des fonctions/blocs (layout), ICF, optimisation des tables de saut, etc.
-Optimisation cache
+
 -->
 
 ---
@@ -344,6 +339,8 @@ Il y a tout de même quelques point important à garder en tête...
   * exemple avec `-march=native` un build sur CPU AMD ne fonctionnera pas sur CPU Intel (`illegal instruction`)
 
 <!--
+Seb -> ça nous a causé problème d'ailleurs n'est pas @Gaston !?
+
 Gaston
 
 - Nous l'avons découvert à la dur, notre runner gitlab était hébergé sur un noeud proxmox sous cpu **Intel Xeon Platinium**, alors que notre **vm de Production** était sur un noeud proxmox sous cpu **AMD EPYC**.
@@ -371,17 +368,20 @@ Gaston
   flowchart LR
     benchmark -..->|" 🔎 CPU, RAM "| cAdvisor
     subgraph monitoring
-      cAdvisor <-..- | 💾 / 5s | prometheus
-      prometheus -..->| 📊 🗠 | grafana
+      cAdvisor -..-> | 💾 / 5s | prometheus
+      prometheus -..->| 📊 📈 | grafana
     end
 </div>
 
-- [cAdvisor](https://github.com/google/cadvisor) : suit les ressources système consommées par les conteneurs
-- [prometheus](https://prometheus.io/) : collecte et persiste des métriques exposées par des endpoints (télémétrie)
+- [cAdvisor](https://github.com/google/cadvisor) : récupère les ressources système consommées par les conteneurs
+- [prometheus](https://prometheus.io/) : collecte et persiste les métriques exposées (télémétrie)
 - [grafana](https://grafana.com/grafana/dashboards/) : agrégation et visualisation temps réel
 
 <!--
 Sébastien
+
+Container Advisor
+
 -->
 
 ---
@@ -416,7 +416,13 @@ Binaire
 Sous le capot
 - pyenv recompile son runtime python
 - uv télécharge des binaires depuis le projet python-build-standalone récement récupéré par astral (https://astral.sh/blog/python-build-standalone)
-  - Si on veux aller plus loin et profiter d'option de compilation spécifique pour des CPUs plus récent, il est possible de recompiler son python-build-standalone en précisant un set de flag plus récent (ex ./build-linux.py --options pgo+lto --target x86_64_v4-unknown-linux-gnu)
+
+
+- Différents compilo
+- Binaire statique vs librarie partagé
+  - Librairie partagé pour python ? Permet d'embarquer le runtime python dans un programme écrit en C ou autre language
+  - On verra plus tard que ça a peut être un impact
+
 
 Option --enable-shared de python pour activer la librarie partagé
 /!\ debian et ubuntu l'utilise mais ensuite rendent statique le runtime
@@ -443,8 +449,6 @@ Option --enable-shared de python pour activer la librarie partagé
 
 <!--
 Luc
-
-TODO mettre en gras les métriques les meilleures
 -->
 
 ---

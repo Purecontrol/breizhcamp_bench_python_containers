@@ -135,7 +135,7 @@ Gaston
 - dégradation des pilotages
 
 <!--
-Gaston ou Sébastien
+Gaston
 -->
 
 ---

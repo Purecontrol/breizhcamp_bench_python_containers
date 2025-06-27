@@ -119,7 +119,6 @@ Avantages classiques d'une image :
 - exécution iso dev / tests / prod
 - déploiement : rapide, automatisable, serein
 
-On en profite pour passer de 3.8 à 3.12 😁
 
 <!--
 Gaston
@@ -145,7 +144,6 @@ Gaston ou Sébastien
 
 - la conteneurisation et l'allocation de ressources (CPU / RAM, overhead réseau) ?
 * la dockerisation (comportement des binaires) ?
-* la montée de version de Python ?
 
 <!--
 Gaston
